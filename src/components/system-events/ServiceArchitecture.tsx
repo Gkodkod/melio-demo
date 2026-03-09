@@ -57,7 +57,7 @@ export default function ServiceArchitecture( { events }: ServiceArchitectureProp
                 Service Architecture
             </h3>
 
-            <div className="grid grid-cols-3 grid-rows-2 gap-x-6 gap-y-6 w-full max-w-lg relative isolate pt-2">
+            <div className="grid grid-cols-3 grid-rows-2 gap-x-4 gap-y-6 w-full max-w-2xl relative isolate pt-2">
 
                 {/* Draw loose SVG lines for connections - simplified for UI flair */}
                 <svg className="absolute inset-0 w-full h-full -z-10 pointer-events-none stroke-current" style={{ color: isDark ? '#334155' : '#cbd5e1' }}>
@@ -94,7 +94,7 @@ export default function ServiceArchitecture( { events }: ServiceArchitectureProp
                                 <Icon size={16} />
                             </div>
                             <span className={cn(
-                                "text-[9px] sm:text-[10px] font-semibold text-center leading-tight",
+                                "text-[10px] sm:text-xs font-semibold text-center leading-tight mt-1",
                                 isPulsing ? ( isDark ? "text-emerald-400" : "text-emerald-700" ) :
                                     isActive ? ( isDark ? "text-indigo-300" : "text-indigo-700" ) :
                                         ( isDark ? "text-slate-500" : "text-slate-500" )
