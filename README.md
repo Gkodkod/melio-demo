@@ -20,6 +20,7 @@ The application simulates a vendor payments platform using mock data and local A
 8. **Dev Console** — mock developer API console for generating API keys, simulating payments, viewing request logs, and triggering mock webhooks
 9. **Partner Portal** — simulator for onboarding external partners, monitoring their API usage, managing webhook connections, and rotating partner API keys
 10. **System Events** — real-time event log and service telemetry dashboard with timeline and architecture visualizations
+11. **Double-Entry Ledger** — core accounting system with strict double-entry invariants, transaction journal, and immutable audit trail
 
 ### Design & Architecture
 
@@ -126,6 +127,14 @@ npx tsx scripts/seed.ts
 - **Service Architecture Diagram**: visual representation of system microservices with real-time highlighting
 - **Payment Lifecycle Timeline**: temporal visualization of a payment's journey through various services
 - **Filtering**: filter events by service, status, or search by correlation ID
+
+### 11. Double-Entry Ledger (`/ledger`)
+
+The Double-Entry Ledger System provides the core accounting backbone needed for a serious fintech product. Built with robust double-entry invariants (sum of debits matches sum of credits), it guarantees that total assets always equal total liabilities plus equity.
+
+- **Chart of Accounts**: Real-time view of balances across asset, liability, and equity accounts (e.g., `buyer_wallet`, `vendor_wallet`, `external_capital`).
+- **Transaction Journal**: Immutable audit trail of every financial movement in the system, displaying the transaction ID, account, description, and the strict debit/credit balance.
+- **Business Rationale**: Every serious payment platform must have an internal source of truth that is mathematically proven to be balanced. This prevents "money out of thin air" bugs, ensures compliance readiness, simplifies reconciliation with banking partners, and allows the business to safely scale its payment volume while maintaining full financial integrity.
 
 ---
 
