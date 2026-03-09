@@ -144,6 +144,25 @@ interface FraudAlertRow {
     triggered_rules: string; status: string; flagged_at: string;
 }
 
+interface PartnerRow {
+    id: string; name: string; status: string; integration_status: string;
+    api_usage: number; webhook_url: string | null; created_at: string;
+}
+
+interface ApiKeyRow {
+    id: string; partner_id: string; key_value: string; status: string;
+    created_at: string; last_used_at: string | null;
+}
+
+interface WebhookRow {
+    id: string; partner_id: string; event_type: string; created_at: string;
+}
+
+interface MetricRow {
+    id: string; partner_id: string; date: string; requests: number;
+    errors: number; latency_ms: number;
+}
+
 // Generate vendors
 const vendors: Vendor[] = companyNames.map( ( name, i ) => {
     const method = Math.random() > 0.3 ? 'ach' : 'card';
@@ -404,6 +423,44 @@ for ( let i = 0; i < flaggedCount; i++ ) {
     } );
 }
 
+// ─── Generate Partner Data ─────────────────────────────────────────
+
+const partners: PartnerRow[] = [
+    { id: 'ptn-001', name: 'Capital One', status: 'active', integration_status: 'healthy', api_usage: 1450200, webhook_url: 'https://api.capitalone.com/webhooks/melio', created_at: '2024-01-15T08:00:00Z' },
+    { id: 'ptn-002', name: 'Plaid', status: 'active', integration_status: 'healthy', api_usage: 3890000, webhook_url: 'https://hooks.plaid.com/melio/v1', created_at: '2024-03-22T10:30:00Z' },
+    { id: 'ptn-003', name: 'Stripe', status: 'active', integration_status: 'degraded', api_usage: 8500400, webhook_url: 'https://api.stripe.com/v1/webhooks/melio-events', created_at: '2023-11-05T14:15:00Z' },
+    { id: 'ptn-004', name: 'QuickBooks Online', status: 'inactive', integration_status: 'offline', api_usage: 125000, webhook_url: null, created_at: '2025-06-12T09:45:00Z' },
+    { id: 'ptn-005', name: 'Xero', status: 'active', integration_status: 'healthy', api_usage: 920500, webhook_url: 'https://api.xero.com/webhooks/v1/melio', created_at: '2024-08-30T11:20:00Z' },
+];
+
+const apiKeys: ApiKeyRow[] = [
+    { id: 'key-001', partner_id: 'ptn-001', key_value: 'pk_live_cap1_8f92j3n4b5v6c7x8z9m0', status: 'active', created_at: '2024-01-15T08:05:00Z', last_used_at: '2026-03-08T22:45:00Z' },
+    { id: 'key-002', partner_id: 'ptn-002', key_value: 'pk_live_plaid_1a2s3d4f5g6h7j8k9l0', status: 'active', created_at: '2024-03-22T10:35:00Z', last_used_at: '2026-03-08T22:50:00Z' },
+    { id: 'key-003', partner_id: 'ptn-003', key_value: 'pk_live_stripe_q1w2e3r4t5y6u7i8o9p0', status: 'active', created_at: '2023-11-05T14:20:00Z', last_used_at: '2026-03-08T22:55:00Z' },
+    { id: 'key-004', partner_id: 'ptn-003', key_value: 'pk_test_stripe_zxcvbnmasdfghjklqw', status: 'revoked', created_at: '2023-11-01T09:00:00Z', last_used_at: '2023-11-05T14:00:00Z' },
+    { id: 'key-005', partner_id: 'ptn-005', key_value: 'pk_live_xero_m9n8b7v6c5x4z3a2s1d0', status: 'active', created_at: '2024-08-30T11:25:00Z', last_used_at: '2026-03-08T22:30:00Z' },
+];
+
+const webhookSubs: WebhookRow[] = [
+    { id: 'sub-001', partner_id: 'ptn-001', event_type: 'payment.created', created_at: '2024-01-15T08:10:00Z' },
+    { id: 'sub-002', partner_id: 'ptn-001', event_type: 'payment.settled', created_at: '2024-01-15T08:10:00Z' },
+    { id: 'sub-003', partner_id: 'ptn-002', event_type: 'payment.processing', created_at: '2024-03-22T10:40:00Z' },
+    { id: 'sub-004', partner_id: 'ptn-002', event_type: 'payment.settled', created_at: '2024-03-22T10:40:00Z' },
+    { id: 'sub-005', partner_id: 'ptn-003', event_type: 'payment.failed', created_at: '2023-11-05T14:25:00Z' },
+];
+
+const apiMetrics: MetricRow[] = [];
+for ( let i = 29; i >= 0; i-- ) {
+    const d = new Date();
+    d.setDate( d.getDate() - i );
+    const dateStr = d.toISOString().split( 'T' )[0];
+    apiMetrics.push( { id: `met-cap1-${i}`, partner_id: 'ptn-001', date: dateStr, requests: Math.floor( Math.random() * 50000 ) + 40000, errors: Math.floor( Math.random() * 100 ), latency_ms: Math.floor( Math.random() * 50 ) + 100 } );
+    apiMetrics.push( { id: `met-plaid-${i}`, partner_id: 'ptn-002', date: dateStr, requests: Math.floor( Math.random() * 100000 ) + 90000, errors: Math.floor( Math.random() * 50 ), latency_ms: Math.floor( Math.random() * 30 ) + 80 } );
+    apiMetrics.push( { id: `met-stripe-${i}`, partner_id: 'ptn-003', date: dateStr, requests: Math.floor( Math.random() * 200000 ) + 150000, errors: Math.floor( Math.random() * 500 ) + 100, latency_ms: Math.floor( Math.random() * 200 ) + 300 } );
+    apiMetrics.push( { id: `met-qb-${i}`, partner_id: 'ptn-004', date: dateStr, requests: Math.floor( Math.random() * 5000 ) + 1000, errors: Math.floor( Math.random() * 5 ), latency_ms: Math.floor( Math.random() * 100 ) + 150 } );
+    apiMetrics.push( { id: `met-xero-${i}`, partner_id: 'ptn-005', date: dateStr, requests: Math.floor( Math.random() * 30000 ) + 20000, errors: Math.floor( Math.random() * 20 ), latency_ms: Math.floor( Math.random() * 40 ) + 120 } );
+}
+
 // ─── Insert into SQLite ────────────────────────────────────────────
 
 console.log( '🗄️  Opening database…' );
@@ -419,6 +476,10 @@ db.exec( `
   DROP TABLE IF EXISTS payments;
   DROP TABLE IF EXISTS invoices;
   DROP TABLE IF EXISTS vendors;
+  DROP TABLE IF EXISTS partner_api_metrics;
+  DROP TABLE IF EXISTS partner_webhook_subscriptions;
+  DROP TABLE IF EXISTS partner_api_keys;
+  DROP TABLE IF EXISTS partners;
 `);
 
 // Re-create tables
@@ -461,6 +522,24 @@ db.exec( `
     risk_level TEXT NOT NULL, triggered_rules TEXT NOT NULL,
     status TEXT NOT NULL, flagged_at TEXT NOT NULL
   );
+  CREATE TABLE partners (
+    id TEXT PRIMARY KEY, name TEXT NOT NULL, status TEXT NOT NULL,
+    integration_status TEXT NOT NULL, api_usage INTEGER NOT NULL DEFAULT 0,
+    webhook_url TEXT, created_at TEXT NOT NULL
+  );
+  CREATE TABLE partner_api_keys (
+    id TEXT PRIMARY KEY, partner_id TEXT NOT NULL, key_value TEXT NOT NULL UNIQUE,
+    status TEXT NOT NULL, created_at TEXT NOT NULL, last_used_at TEXT
+  );
+  CREATE TABLE partner_webhook_subscriptions (
+    id TEXT PRIMARY KEY, partner_id TEXT NOT NULL, event_type TEXT NOT NULL,
+    created_at TEXT NOT NULL
+  );
+  CREATE TABLE partner_api_metrics (
+    id TEXT PRIMARY KEY, partner_id TEXT NOT NULL, date TEXT NOT NULL,
+    requests INTEGER NOT NULL DEFAULT 0, errors INTEGER NOT NULL DEFAULT 0,
+    latency_ms INTEGER NOT NULL DEFAULT 0
+  );
 `);
 
 // Insert data
@@ -470,6 +549,10 @@ const insertPayment = db.prepare( `INSERT INTO payments VALUES (?,?,?,?,?,?,?,?,
 const insertEvent = db.prepare( `INSERT INTO transaction_events VALUES (?,?,?,?,?,?,?,?,?)` );
 const insertRec = db.prepare( `INSERT INTO reconciliation_records VALUES (?,?,?,?,?,?,?,?,?,?,?)` );
 const insertFraud = db.prepare( `INSERT INTO fraud_alerts VALUES (?,?,?,?,?,?,?,?,?,?)` );
+const insertPartner = db.prepare( `INSERT INTO partners VALUES (?,?,?,?,?,?,?)` );
+const insertApiKey = db.prepare( `INSERT INTO partner_api_keys VALUES (?,?,?,?,?,?)` );
+const insertWebhookSub = db.prepare( `INSERT INTO partner_webhook_subscriptions VALUES (?,?,?,?)` );
+const insertApiMetric = db.prepare( `INSERT INTO partner_api_metrics VALUES (?,?,?,?,?,?)` );
 
 const insertAll = db.transaction( () => {
     for ( const v of vendors ) {
@@ -490,6 +573,18 @@ const insertAll = db.transaction( () => {
     for ( const f of fraudAlerts ) {
         insertFraud.run( f.id, f.payment_id, f.vendor_id, f.vendor_name, f.amount, f.risk_score, f.risk_level, f.triggered_rules, f.status, f.flagged_at );
     }
+    for ( const p of partners ) {
+        insertPartner.run( p.id, p.name, p.status, p.integration_status, p.api_usage, p.webhook_url, p.created_at );
+    }
+    for ( const k of apiKeys ) {
+        insertApiKey.run( k.id, k.partner_id, k.key_value, k.status, k.created_at, k.last_used_at );
+    }
+    for ( const w of webhookSubs ) {
+        insertWebhookSub.run( w.id, w.partner_id, w.event_type, w.created_at );
+    }
+    for ( const m of apiMetrics ) {
+        insertApiMetric.run( m.id, m.partner_id, m.date, m.requests, m.errors, m.latency_ms );
+    }
 } );
 
 insertAll();
@@ -502,3 +597,4 @@ console.log( `   ${payments.length} payments` );
 console.log( `   ${events.length} transaction events` );
 console.log( `   ${reconciliation.length} reconciliation records` );
 console.log( `   ${fraudAlerts.length} fraud alerts` );
+console.log( `   ${partners.length} partners (and keys, webhooks, metrics)` );

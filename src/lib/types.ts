@@ -113,3 +113,44 @@ export interface FraudDashboardSummary {
   riskTrend: { date: string; count: number; avgScore: number }[];
   ruleStats: { rule: string; triggerCount: number }[];
 }
+
+// ─── Partner Portal Types ──────────────────────────────────────────
+
+export type PartnerStatus = 'active' | 'inactive' | 'suspended';
+export type IntegrationStatus = 'healthy' | 'degraded' | 'offline';
+export type ApiKeyStatus = 'active' | 'revoked';
+
+export interface Partner {
+  id: string;
+  name: string;
+  status: PartnerStatus;
+  integrationStatus: IntegrationStatus;
+  apiUsage: number;
+  webhookUrl?: string;
+  createdAt: string;
+}
+
+export interface PartnerApiKey {
+  id: string;
+  partnerId: string;
+  keyValue: string;
+  status: ApiKeyStatus;
+  createdAt: string;
+  lastUsedAt?: string;
+}
+
+export interface WebhookSubscription {
+  id: string;
+  partnerId: string;
+  eventType: string;
+  createdAt: string;
+}
+
+export interface ApiUsageMetric {
+  id: string;
+  partnerId: string;
+  date: string;
+  requests: number;
+  errors: number;
+  latencyMs: number;
+}

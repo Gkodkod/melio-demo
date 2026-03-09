@@ -18,6 +18,7 @@ The application simulates a vendor payments platform using mock data and local A
 6. **Reconciliation Page** — table showing invoice amount vs payment amount, settlement batch grouping, highlight mismatches
 7. **Fraud Monitor** — suspicious activity detection, risk scoring rules engine, flagged transactions table, vendor risk profiling
 8. **Dev Console** — mock developer API console for generating API keys, simulating payments, viewing request logs, and triggering mock webhooks
+9. **Partner Portal** — simulator for onboarding external partners, monitoring their API usage, managing webhook connections, and rotating partner API keys
 
 ### Design & Architecture
 
@@ -49,9 +50,9 @@ npx tsx scripts/seed.ts
 | **Seed Script** | `scripts/seed.ts` | Generates ~30 vendors, ~100 invoices, ~65 payments, ~150 events, ~40 fraud alerts |
 | **Types** | `src/lib/types.ts` | All domain entities (Vendor, Invoice, Payment, TransactionEvent, etc.) |
 | **Utilities** | `src/lib/utils.ts` | Currency formatting, date formatting, `cn()`, status colors |
-| **API Routes** | `src/app/api/` | 14 REST endpoints querying SQLite (including fraud-monitor, dev-console) |
+| **API Routes** | `src/app/api/` | REST endpoints querying SQLite (including fraud-monitor, dev-console) |
 | **Components** | `src/components/` | Sidebar, DataTable, SummaryCard, StatusBadge, PageHeader, ThemeProvider, RiskScoreBar |
-| **Pages** | `src/app/` | 8 feature pages + vendor detail page |
+| **Pages** | `src/app/` | 9 feature pages + vendor & partner detail pages |
 
 ---
 
@@ -109,6 +110,11 @@ npx tsx scripts/seed.ts
 - **API Logs**: table of developer API requests with latency and status, featuring expandable rows revealing the exact request/response JSON payloads
 - **Webhook Simulator**: dispatch mock Stripe-style lifecycle events (e.g., `payment.succeeded`) and view simulated delivery logs with a retry mechanism
 
+### 9. Partner Portal (`/partner-portal`)
+
+- **Partner Directory**: table of integrated partners (e.g., Capital One, Stripe) displaying integration health and API usage stats
+- **Partner Dashboard (`/[id]`)**: detailed view featuring Recharts-powered graphs for 30-day API Requests (`requests`) and Latency (`latency_ms`) vs Errors
+- **API Keys & Webhooks**: interactive Client Components with Server Actions for securely rotating keys and registering webhook endpoint subscriptions
 
 ---
 

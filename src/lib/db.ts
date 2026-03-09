@@ -131,6 +131,41 @@ function initSchema( db: Database.Database ) {
       next_retry_at TEXT,
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS partners (
+      id TEXT PRIMARY KEY,
+      name TEXT NOT NULL,
+      status TEXT NOT NULL CHECK(status IN ('active', 'inactive', 'suspended')),
+      integration_status TEXT NOT NULL CHECK(integration_status IN ('healthy', 'degraded', 'offline')),
+      api_usage INTEGER NOT NULL DEFAULT 0,
+      webhook_url TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS partner_api_keys (
+      id TEXT PRIMARY KEY,
+      partner_id TEXT NOT NULL REFERENCES partners(id),
+      key_value TEXT NOT NULL UNIQUE,
+      status TEXT NOT NULL CHECK(status IN ('active', 'revoked')),
+      created_at TEXT NOT NULL,
+      last_used_at TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS partner_webhook_subscriptions (
+      id TEXT PRIMARY KEY,
+      partner_id TEXT NOT NULL REFERENCES partners(id),
+      event_type TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS partner_api_metrics (
+      id TEXT PRIMARY KEY,
+      partner_id TEXT NOT NULL REFERENCES partners(id),
+      date TEXT NOT NULL,
+      requests INTEGER NOT NULL DEFAULT 0,
+      errors INTEGER NOT NULL DEFAULT 0,
+      latency_ms INTEGER NOT NULL DEFAULT 0
+    );
   `);
 }
 
@@ -268,5 +303,50 @@ export function mapDevWebhookLog( row: Record<string, unknown> ) {
         lastAttemptAt: row.last_attempt_at,
         nextRetryAt: row.next_retry_at,
         createdAt: row.created_at,
+    };
+}
+
+// ─── Partner Portal Mappers ────────────────────────────────────────
+
+export function mapPartner( row: Record<string, unknown> ) {
+    return {
+        id: row.id,
+        name: row.name,
+        status: row.status,
+        integrationStatus: row.integration_status,
+        apiUsage: row.api_usage,
+        webhookUrl: row.webhook_url,
+        createdAt: row.created_at,
+    };
+}
+
+export function mapPartnerApiKey( row: Record<string, unknown> ) {
+    return {
+        id: row.id,
+        partnerId: row.partner_id,
+        keyValue: row.key_value,
+        status: row.status,
+        createdAt: row.created_at,
+        lastUsedAt: row.last_used_at,
+    };
+}
+
+export function mapPartnerWebhookSubscription( row: Record<string, unknown> ) {
+    return {
+        id: row.id,
+        partnerId: row.partner_id,
+        eventType: row.event_type,
+        createdAt: row.created_at,
+    };
+}
+
+export function mapPartnerApiMetric( row: Record<string, unknown> ) {
+    return {
+        id: row.id,
+        partnerId: row.partner_id,
+        date: row.date,
+        requests: row.requests,
+        errors: row.errors,
+        latencyMs: row.latency_ms,
     };
 }

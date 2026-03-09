@@ -15,6 +15,7 @@ import {
     X,
     Sun,
     Moon,
+    Network,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -29,6 +30,7 @@ const navItems = [
     { label: 'Reconciliation', href: '/reconciliation', icon: Scale },
     { label: 'Fraud Monitor', href: '/fraud-monitor', icon: ShieldAlert },
     { label: 'Dev Console', href: '/dev-console', icon: Terminal },
+    { label: 'Partner Portal', href: '/partner-portal', icon: Network },
 ];
 
 export default function Sidebar() {
