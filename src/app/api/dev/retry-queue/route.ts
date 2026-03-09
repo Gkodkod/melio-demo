@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getDb, mapRetryQueueEntry } from '@/lib/db';
 import { SupabaseClient } from '@supabase/supabase-js';
