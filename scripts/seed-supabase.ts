@@ -230,7 +230,7 @@ for ( let i = 0; i < flaggedCount; i++ ) {
 const partners = [
     { id: 'ptn-001', name: 'Capital One', status: 'active', integration_status: 'healthy', api_usage: 1450200, webhook_url: 'https://api.capitalone.com/webhooks/melio', created_at: '2024-01-15T08:00:00Z' },
     { id: 'ptn-002', name: 'Plaid', status: 'active', integration_status: 'healthy', api_usage: 3890000, webhook_url: 'https://hooks.plaid.com/melio/v1', created_at: '2024-03-22T10:30:00Z' },
-    { id: 'ptn-003', name: 'Stripe', status: 'active', integration_status: 'degraded', api_usage: 8500400, webhook_url: 'https://api.stripe.com/v1/webhooks/melio-events', created_at: '2023-11-05T14:15:00Z' },
+    { id: 'ptn-003', name: 'Shopify', status: 'active', integration_status: 'degraded', api_usage: 8500400, webhook_url: 'https://api.shopify.com/v1/webhooks/melio-events', created_at: '2023-11-05T14:15:00Z' },
     { id: 'ptn-004', name: 'QuickBooks Online', status: 'inactive', integration_status: 'offline', api_usage: 125000, webhook_url: null, created_at: '2025-06-12T09:45:00Z' },
     { id: 'ptn-005', name: 'Xero', status: 'active', integration_status: 'healthy', api_usage: 920500, webhook_url: 'https://api.xero.com/webhooks/v1/melio', created_at: '2024-08-30T11:20:00Z' },
 ];

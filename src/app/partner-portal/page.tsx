@@ -5,6 +5,8 @@ import PageHeader from '@/components/page-header';
 import Link from 'next/link';
 import StatusBadge from '@/components/status-badge';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
     title: 'Partner Integrations | Melio',
     description: 'Manage external partner integrations.',

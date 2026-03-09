@@ -10,6 +10,8 @@ import ApiKeysManager from '@/components/partner-portal/api-keys-manager';
 import WebhookManager from '@/components/partner-portal/webhook-manager';
 import MetricsChart from '@/components/partner-portal/metrics-charts';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
     title: 'Partner Detail | Melio',
 };

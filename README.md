@@ -151,7 +151,7 @@ npm run seed
 
 ### 9. Partner Portal (`/partner-portal`)
 
--   **Partner Directory**: table of integrated partners (e.g., Capital One, Stripe) displaying integration health and API usage stats
+-   **Partner Directory**: table of integrated partners (e.g., Capital One, Shopify) displaying integration health and API usage stats
 -   **Partner Dashboard (`/[id]`)**: detailed view featuring Recharts-powered graphs for 30-day API Requests (`requests`) and Latency (`latency_ms`) vs Errors
 -   **API Keys & Webhooks**: interactive Client Components with Server Actions for securely rotating keys and registering webhook endpoint subscriptions
 
