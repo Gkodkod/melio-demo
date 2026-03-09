@@ -10,6 +10,7 @@ import {
     Activity,
     Scale,
     ShieldAlert,
+    Terminal,
     Menu,
     X,
     Sun,
@@ -27,6 +28,7 @@ const navItems = [
     { label: 'Transactions', href: '/transactions', icon: Activity },
     { label: 'Reconciliation', href: '/reconciliation', icon: Scale },
     { label: 'Fraud Monitor', href: '/fraud-monitor', icon: ShieldAlert },
+    { label: 'Dev Console', href: '/dev-console', icon: Terminal },
 ];
 
 export default function Sidebar() {

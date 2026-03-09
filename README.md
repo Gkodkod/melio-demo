@@ -17,6 +17,7 @@ The application simulates a vendor payments platform using mock data and local A
 5. **Transactions Feed** — event-style log similar to Stripe webhooks tracking payment lifecycle events
 6. **Reconciliation Page** — table showing invoice amount vs payment amount, settlement batch grouping, highlight mismatches
 7. **Fraud Monitor** — suspicious activity detection, risk scoring rules engine, flagged transactions table, vendor risk profiling
+8. **Dev Console** — mock developer API console for generating API keys, simulating payments, viewing request logs, and triggering mock webhooks
 
 ### Design & Architecture
 
@@ -48,9 +49,9 @@ npx tsx scripts/seed.ts
 | **Seed Script** | `scripts/seed.ts` | Generates ~30 vendors, ~100 invoices, ~65 payments, ~150 events, ~40 fraud alerts |
 | **Types** | `src/lib/types.ts` | All domain entities (Vendor, Invoice, Payment, TransactionEvent, etc.) |
 | **Utilities** | `src/lib/utils.ts` | Currency formatting, date formatting, `cn()`, status colors |
-| **API Routes** | `src/app/api/` | 10 REST endpoints querying SQLite (including fraud-monitor) |
+| **API Routes** | `src/app/api/` | 14 REST endpoints querying SQLite (including fraud-monitor, dev-console) |
 | **Components** | `src/components/` | Sidebar, DataTable, SummaryCard, StatusBadge, PageHeader, ThemeProvider, RiskScoreBar |
-| **Pages** | `src/app/` | 7 feature pages + vendor detail page |
+| **Pages** | `src/app/` | 8 feature pages + vendor detail page |
 
 ---
 
@@ -100,6 +101,14 @@ npx tsx scripts/seed.ts
 - Suspicious payments table with search, risk filters, and color-coded risk score bars
 - Detail modal showing risk assessment gauge, payment info, triggered rules, vendor risk profile, and transaction history
 - Modular rules engine evaluating payments against customizable fraud patterns (e.g. High Amount, Rapid Payments)
+
+### 8. Dev Console (`/dev-console`)
+
+- **API Keys**: mock key generation UI, publishable/secret key display, and rotation
+- **Payment API Simulator**: request building form for `/api/dev/payments` auto-filling the active secret key, with dark-themed JSON request and response viewers
+- **API Logs**: table of developer API requests with latency and status, featuring expandable rows revealing the exact request/response JSON payloads
+- **Webhook Simulator**: dispatch mock Stripe-style lifecycle events (e.g., `payment.succeeded`) and view simulated delivery logs with a retry mechanism
+
 
 ---
 

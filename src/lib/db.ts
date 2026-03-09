@@ -99,6 +99,38 @@ function initSchema( db: Database.Database ) {
       status TEXT NOT NULL CHECK(status IN ('pending', 'investigating', 'cleared', 'confirmed')),
       flagged_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS dev_api_keys (
+      id TEXT PRIMARY KEY,
+      publishable_key TEXT NOT NULL UNIQUE,
+      secret_key TEXT NOT NULL UNIQUE,
+      name TEXT NOT NULL,
+      status TEXT NOT NULL CHECK(status IN ('active', 'revoked')),
+      created_at TEXT NOT NULL,
+      last_used_at TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS dev_api_logs (
+      id TEXT PRIMARY KEY,
+      endpoint TEXT NOT NULL,
+      method TEXT NOT NULL CHECK(method IN ('GET', 'POST', 'PUT', 'DELETE', 'PATCH')),
+      status_code INTEGER NOT NULL,
+      latency_ms INTEGER NOT NULL,
+      request_payload TEXT,
+      response_payload TEXT,
+      created_at TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS dev_webhook_logs (
+      id TEXT PRIMARY KEY,
+      event_type TEXT NOT NULL,
+      payload TEXT NOT NULL,
+      status TEXT NOT NULL CHECK(status IN ('pending', 'delivered', 'failed')),
+      delivery_attempts INTEGER NOT NULL DEFAULT 0,
+      last_attempt_at TEXT,
+      next_retry_at TEXT,
+      created_at TEXT NOT NULL
+    );
   `);
 }
 
@@ -198,5 +230,43 @@ export function mapFraudAlert( row: Record<string, unknown> ) {
         triggeredRules: JSON.parse( row.triggered_rules as string ),
         status: row.status,
         flaggedAt: row.flagged_at,
+    };
+}
+
+export function mapDevApiKey( row: Record<string, unknown> ) {
+    return {
+        id: row.id,
+        publishableKey: row.publishable_key,
+        secretKey: row.secret_key,
+        name: row.name,
+        status: row.status,
+        createdAt: row.created_at,
+        lastUsedAt: row.last_used_at,
+    };
+}
+
+export function mapDevApiLog( row: Record<string, unknown> ) {
+    return {
+        id: row.id,
+        endpoint: row.endpoint,
+        method: row.method,
+        statusCode: row.status_code,
+        latencyMs: row.latency_ms,
+        requestPayload: row.request_payload ? JSON.parse( row.request_payload as string ) : null,
+        responsePayload: row.response_payload ? JSON.parse( row.response_payload as string ) : null,
+        createdAt: row.created_at,
+    };
+}
+
+export function mapDevWebhookLog( row: Record<string, unknown> ) {
+    return {
+        id: row.id,
+        eventType: row.event_type,
+        payload: JSON.parse( row.payload as string ),
+        status: row.status,
+        deliveryAttempts: row.delivery_attempts,
+        lastAttemptAt: row.last_attempt_at,
+        nextRetryAt: row.next_retry_at,
+        createdAt: row.created_at,
     };
 }
