@@ -1,6 +1,6 @@
 # Melio — Vendor Payments Platform
 
-A modern fintech web application built with **Next.js 14**, **TypeScript**, and **Tailwind CSS** that simulates a vendor payments platform similar to Melio or Bill.com using mocked data and local API routes.
+A modern fintech web application built with **Next.js 14**, **TypeScript**, **Tailwind CSS**, and **SQLite** that simulates a vendor payments platform similar to Melio or Bill.com.
 
 ---
 
@@ -31,8 +31,14 @@ A modern fintech web application built with **Next.js 14**, **TypeScript**, and 
 
 ```bash
 npm install
-npm run dev
-# → http://localhost:3000
+npx tsx scripts/seed.ts   # seed the SQLite database
+npm run dev               # → http://localhost:3000
+```
+
+To re-seed the database with fresh randomized data at any time:
+
+```bash
+npx tsx scripts/seed.ts
 ```
 
 ---
@@ -40,12 +46,13 @@ npm run dev
 ## Architecture
 
 | Layer | Files | Description |
-|-------|-------|-------------|
+| ----- | ----- | ----------- |
+| **Database** | `src/lib/db.ts` | SQLite connection, schema init, row-to-camelCase mappers |
+| **Seed Script** | `scripts/seed.ts` | Generates ~30 vendors, ~100 invoices, ~65 payments, ~150 events |
 | **Types** | `src/lib/types.ts` | All domain entities (Vendor, Invoice, Payment, TransactionEvent, etc.) |
-| **Mock Data** | `src/lib/mock-data.ts` | 8 vendors, 10 invoices, 8 payments, 12 events, 6 reconciliation records |
 | **Utilities** | `src/lib/utils.ts` | Currency formatting, date formatting, `cn()`, status colors |
-| **API Routes** | `src/app/api/` | 7 REST endpoints: vendors, invoices, payments, transactions, reconciliation, dashboard |
-| **Components** | `src/components/` | Sidebar, DataTable, SummaryCard, StatusBadge, PageHeader, Providers |
+| **API Routes** | `src/app/api/` | 7 REST endpoints querying SQLite |
+| **Components** | `src/components/` | Sidebar, DataTable, SummaryCard, StatusBadge, PageHeader, ThemeProvider |
 | **Pages** | `src/app/` | 6 feature pages + vendor detail page |
 
 ---
@@ -85,11 +92,32 @@ npm run dev
 
 ---
 
+## Database
+
+All data is stored in a local **SQLite** database (`melio.db`) via `better-sqlite3`. The API routes run SQL queries directly — no ORM overhead.
+
+The seed script (`scripts/seed.ts`) programmatically generates randomized but realistic data including:
+
+- 30 vendors with ACH/card payment methods and bank verification statuses
+- ~100+ invoices across all vendors with varying statuses
+- ~65 payments spanning the full lifecycle (draft → settled / failed)
+- ~150+ transaction events (webhook-style lifecycle logs)
+- ~40 reconciliation records grouped into settlement batches
+
+---
+
+## Theme Toggle
+
+The app ships with a **dark/light theme toggle** in the sidebar. The theme preference is persisted in `localStorage` and applied via CSS custom properties with a `data-theme` attribute on the root element.
+
+---
+
 ## Tech Stack
 
 - **Framework:** Next.js 14 (App Router)
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
+- **Database:** SQLite via better-sqlite3
 - **Charts:** Recharts
 - **Data Fetching:** TanStack React Query
 - **Icons:** Lucide React

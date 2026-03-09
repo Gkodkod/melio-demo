@@ -1,15 +1,15 @@
 import { NextResponse } from 'next/server';
-import { payments } from '@/lib/mock-data';
+import { getDb } from '@/lib/db';
 
 export async function GET() {
-    const total = payments.length;
-    const pending = payments.filter( ( p ) => p.status === 'scheduled' || p.status === 'draft' ).length;
-    const completed = payments.filter( ( p ) => p.status === 'settled' ).length;
-    const failed = payments.filter( ( p ) => p.status === 'failed' ).length;
-    const totalVolume = payments.reduce( ( sum, p ) => sum + p.amount, 0 );
-    const pendingVolume = payments
-        .filter( ( p ) => p.status === 'scheduled' || p.status === 'draft' || p.status === 'processing' )
-        .reduce( ( sum, p ) => sum + p.amount, 0 );
+    const db = getDb();
+
+    const total = ( db.prepare( 'SELECT COUNT(*) as c FROM payments' ).get() as { c: number } ).c;
+    const pending = ( db.prepare( "SELECT COUNT(*) as c FROM payments WHERE status IN ('scheduled', 'draft')" ).get() as { c: number } ).c;
+    const completed = ( db.prepare( "SELECT COUNT(*) as c FROM payments WHERE status = 'settled'" ).get() as { c: number } ).c;
+    const failed = ( db.prepare( "SELECT COUNT(*) as c FROM payments WHERE status = 'failed'" ).get() as { c: number } ).c;
+    const totalVolume = ( db.prepare( 'SELECT COALESCE(SUM(amount), 0) as s FROM payments' ).get() as { s: number } ).s;
+    const pendingVolume = ( db.prepare( "SELECT COALESCE(SUM(amount), 0) as s FROM payments WHERE status IN ('scheduled', 'draft', 'processing')" ).get() as { s: number } ).s;
 
     return NextResponse.json( {
         totalPayments: total,

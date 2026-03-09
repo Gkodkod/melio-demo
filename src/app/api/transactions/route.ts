@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
-import { transactionEvents } from '@/lib/mock-data';
+import { getDb, mapTransactionEvent } from '@/lib/db';
 
 export async function GET() {
-    const sorted = [...transactionEvents].sort(
-        ( a, b ) => new Date( b.timestamp ).getTime() - new Date( a.timestamp ).getTime()
-    );
-    return NextResponse.json( sorted );
+    const db = getDb();
+    const rows = db.prepare( 'SELECT * FROM transaction_events ORDER BY timestamp DESC' ).all();
+    return NextResponse.json( rows.map( ( r ) => mapTransactionEvent( r as Record<string, unknown> ) ) );
 }

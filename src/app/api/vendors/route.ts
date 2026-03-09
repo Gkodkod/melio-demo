@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
-import { vendors } from '@/lib/mock-data';
+import { getDb, mapVendor } from '@/lib/db';
 
 export async function GET() {
-    return NextResponse.json( vendors );
+    const db = getDb();
+    const rows = db.prepare( 'SELECT * FROM vendors ORDER BY name' ).all();
+    return NextResponse.json( rows.map( ( r ) => mapVendor( r as Record<string, unknown> ) ) );
 }

@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
-import { vendors } from '@/lib/mock-data';
+import { getDb, mapVendor } from '@/lib/db';
 
 export async function GET(
     _request: Request,
     { params }: { params: { id: string } }
 ) {
-    const vendor = vendors.find( ( v ) => v.id === params.id );
-    if ( !vendor ) {
+    const db = getDb();
+    const row = db.prepare( 'SELECT * FROM vendors WHERE id = ?' ).get( params.id );
+    if ( !row ) {
         return NextResponse.json( { error: 'Vendor not found' }, { status: 404 } );
     }
-    return NextResponse.json( vendor );
+    return NextResponse.json( mapVendor( row as Record<string, unknown> ) );
 }
