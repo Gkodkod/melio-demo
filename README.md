@@ -1,12 +1,26 @@
-# Melio — SMB Vendor Payments Platform
+# Melio — SMB Vendor Payments Platform Demo
 
 A modern fintech web application built with **React / Next.js 14**, **TypeScript**, **Tailwind CSS**, and **Supabase PostgresDB**. It simulates a vendor payments platform similar to Melio or Bill.com, intended to be deployed on **Vercel**. It simulates these Accounts Payable/Receivable software for SMBs and Accountants
 
+LIVE DEMO: [https://melio-demo-three.vercel.app/](https://melio-demo-three.vercel.app/)
 ---
 
 ## Overview
 
 The application simulates a vendor payments platform using mock data and local API routes, demonstrating a realistic payments workflow and financial dashboard, as though they were running in a real production environment on AWS.
+
+### Design Goals
+
+This project demonstrates core fintech platform concepts:
+
+• payment lifecycle orchestration
+• event-driven architecture
+• fraud monitoring
+• reconciliation systems
+• partner API integrations
+• idempotent APIs
+• double-entry ledger accounting
+• observability and operational metrics
 
 ### Core Features
 
