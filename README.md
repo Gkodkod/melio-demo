@@ -110,6 +110,7 @@ npx tsx scripts/seed.ts
 
 - **API Keys**: mock key generation UI, publishable/secret key display, and rotation
 - **Payment API Simulator**: request building form for `/api/dev/payments` auto-filling the active secret key, with dark-themed JSON request and response viewers
+- **Idempotency-Key Support**: `/api/dev/payments` supports the `Idempotency-Key` header. Identical requests with a reused key skip processing and return the originally stored payload, ensuring idempotent retries for robust integrations.
 - **API Logs**: table of developer API requests with latency and status, featuring expandable rows revealing the exact request/response JSON payloads
 - **Webhook Simulator**: dispatch mock Stripe-style lifecycle events (e.g., `payment.succeeded`) and view simulated delivery logs with a retry mechanism
 

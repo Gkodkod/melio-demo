@@ -16,6 +16,17 @@ export async function POST( request: Request ) {
             return NextResponse.json( responsePayload, { status: statusCode } );
         }
 
+        const idempotencyKey = request.headers.get( 'Idempotency-Key' );
+        const db = getDb();
+
+        if ( idempotencyKey ) {
+            const existingKey = db.prepare( 'SELECT response_payload FROM idempotency_keys WHERE key = ? AND endpoint = ?' ).get( idempotencyKey, '/api/dev/payments' ) as { response_payload: string } | undefined;
+            if ( existingKey ) {
+                responsePayload = JSON.parse( existingKey.response_payload );
+                return NextResponse.json( responsePayload, { status: 200 } );
+            }
+        }
+
         requestPayload = await request.json();
         const { amount, currency, vendor_id, payment_method, description } = requestPayload as any;
 
@@ -42,6 +53,18 @@ export async function POST( request: Request ) {
             created: Math.floor( Date.now() / 1000 ),
             livemode: false,
         };
+
+        if ( idempotencyKey ) {
+            db.prepare( `
+                INSERT INTO idempotency_keys (key, endpoint, response_payload, created_at)
+                VALUES (?, ?, ?, ?)
+            ` ).run(
+                idempotencyKey,
+                '/api/dev/payments',
+                JSON.stringify( responsePayload ),
+                new Date().toISOString()
+            );
+        }
 
         return NextResponse.json( responsePayload, { status: statusCode } );
 

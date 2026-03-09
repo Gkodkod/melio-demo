@@ -42,7 +42,6 @@ export default function PartnerDetailPage( { params }: { params: { id: string } 
                 <PageHeader
                     title={partner.name}
                     description={`Partner Integrator | ID: ${partner.id}`}
-                    icon={Network}
                 />
                 <div className="flex items-center gap-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-2 rounded-xl shadow-sm">
                     <span className="text-sm font-medium text-slate-500 dark:text-slate-400 px-2">Account:</span>

@@ -132,6 +132,13 @@ function initSchema( db: Database.Database ) {
       created_at TEXT NOT NULL
     );
 
+    CREATE TABLE IF NOT EXISTS idempotency_keys (
+      key TEXT PRIMARY KEY,
+      endpoint TEXT NOT NULL,
+      response_payload TEXT NOT NULL,
+      created_at TEXT NOT NULL
+    );
+
     CREATE TABLE IF NOT EXISTS partners (
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
