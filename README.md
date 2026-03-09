@@ -81,7 +81,9 @@ npx tsx scripts/seed.ts
 ### 4. Payments (`/payments`)
 
 - **Create Payment** modal: select vendor, invoice, payment method (ACH/Card), schedule date
-- **Payment detail** modal with lifecycle stepper: Draft → Scheduled → Processing → Settled
+- **Payment detail** modal with advanced **Payment Lifecycle Timeline** component:
+  - Vertical layout with status icons, timestamps, and active states (Draft → Scheduled → Processing → Settled)
+  - Expandable event details revealing simulated JSON API payloads for each step
 - Failed payments show error reason with red highlight
 
 ### 5. Transactions (`/transactions`)

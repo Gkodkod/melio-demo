@@ -12,6 +12,7 @@ import { useState } from 'react';
 import DataTable, { DataTableColumn } from '@/components/data-table';
 import StatusBadge from '@/components/status-badge';
 import PageHeader from '@/components/page-header';
+import PaymentTimeline from '@/components/payment-timeline';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import type { Payment, Vendor, Invoice } from '@/lib/types';
 
@@ -233,43 +234,9 @@ export default function PaymentsPage() {
                         <h2 className="text-xl font-bold text-white mb-1">{showDetailModal.id}</h2>
                         <p className="text-sm text-slate-400 mb-6">{showDetailModal.vendorName}</p>
 
-                        {/* Lifecycle Stepper */}
-                        <div className="mb-6">
-                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">Payment Lifecycle</p>
-                            <div className="flex items-center justify-between">
-                                {LIFECYCLE_STEPS.map( ( step, i ) => {
-                                    const current = getCurrentStep( showDetailModal.status );
-                                    const isFailed = showDetailModal.status === 'failed';
-                                    const isActive = i <= current;
-                                    return (
-                                        <div key={step} className="flex items-center">
-                                            <div className="flex flex-col items-center">
-                                                <div
-                                                    className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${isFailed && i > 0
-                                                        ? 'bg-red-500/10 text-red-400 ring-1 ring-red-500/30'
-                                                        : isActive
-                                                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/30'
-                                                            : 'bg-slate-800 text-slate-500 ring-1 ring-slate-700'
-                                                        }`}
-                                                >
-                                                    {i + 1}
-                                                </div>
-                                                <span className={`text-[10px] mt-1 capitalize ${isActive ? 'text-indigo-300' : 'text-slate-600'}`}>
-                                                    {step}
-                                                </span>
-                                            </div>
-                                            {i < LIFECYCLE_STEPS.length - 1 && (
-                                                <ArrowRight size={14} className="mx-2 text-slate-700 mt-[-14px]" />
-                                            )}
-                                        </div>
-                                    );
-                                } )}
-                            </div>
-                            {showDetailModal.status === 'failed' && (
-                                <div className="mt-3 p-3 rounded-xl bg-red-500/5 ring-1 ring-red-500/20">
-                                    <p className="text-xs text-red-400">{showDetailModal.failureReason}</p>
-                                </div>
-                            )}
+                        {/* Payment Timeline */}
+                        <div className="mb-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                            <PaymentTimeline payment={showDetailModal} />
                         </div>
 
                         <div className="glass-card rounded-xl p-4 space-y-3">
