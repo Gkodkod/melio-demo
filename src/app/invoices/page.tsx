@@ -6,6 +6,7 @@ import { useState } from 'react';
 import DataTable, { DataTableColumn } from '@/components/data-table';
 import StatusBadge from '@/components/status-badge';
 import PageHeader from '@/components/page-header';
+import InvoicePdfViewer from '@/components/invoice-pdf-viewer';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import type { Invoice } from '@/lib/types';
 
@@ -14,6 +15,7 @@ export default function InvoicesPage() {
     const [filterStatus, setFilterStatus] = useState<string>( 'all' );
     const [showUploadModal, setShowUploadModal] = useState( false );
     const [showApprovalModal, setShowApprovalModal] = useState<Invoice | null>( null );
+    const [showPdfViewer, setShowPdfViewer] = useState<Invoice | null>( null );
 
     const { data: invoices = [], isLoading } = useQuery<Invoice[]>( {
         queryKey: ['invoices'],
@@ -74,20 +76,31 @@ export default function InvoicesPage() {
         {
             key: 'actions',
             header: '',
-            render: ( i ) =>
-                i.status === 'pending' ? (
+            render: ( i ) => (
+                <div className="flex items-center gap-3 justify-end">
+                    {i.status === 'pending' && (
+                        <button
+                            onClick={( e ) => {
+                                e.stopPropagation();
+                                setShowApprovalModal( i );
+                            }}
+                            className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+                        >
+                            Review
+                        </button>
+                    )}
                     <button
                         onClick={( e ) => {
                             e.stopPropagation();
-                            setShowApprovalModal( i );
+                            setShowPdfViewer( i );
                         }}
-                        className="text-xs font-semibold text-indigo-400 hover:text-indigo-300 transition-colors"
+                        className="text-xs font-semibold text-slate-400 hover:text-white transition-colors flex items-center gap-1.5 bg-slate-800/50 hover:bg-slate-700/50 px-3 py-1.5 rounded-lg border border-slate-700/50"
                     >
-                        Review
+                        <FileText size={14} />
+                        View PDF
                     </button>
-                ) : i.fileName ? (
-                    <span className="text-xs text-slate-500">{i.fileName}</span>
-                ) : null,
+                </div>
+            )
         },
     ];
 
@@ -222,6 +235,13 @@ export default function InvoicesPage() {
                         </div>
                     </div>
                 </div>
+            )}
+
+            {showPdfViewer && (
+                <InvoicePdfViewer
+                    invoice={showPdfViewer}
+                    onClose={() => setShowPdfViewer( null )}
+                />
             )}
         </div>
     );
