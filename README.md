@@ -19,6 +19,7 @@ The application simulates a vendor payments platform using mock data and local A
 7. **Fraud Monitor** — suspicious activity detection, risk scoring rules engine, flagged transactions table, vendor risk profiling
 8. **Dev Console** — mock developer API console for generating API keys, simulating payments, viewing request logs, and triggering mock webhooks
 9. **Partner Portal** — simulator for onboarding external partners, monitoring their API usage, managing webhook connections, and rotating partner API keys
+10. **System Events** — real-time event log and service telemetry dashboard with timeline and architecture visualizations
 
 ### Design & Architecture
 
@@ -115,6 +116,13 @@ npx tsx scripts/seed.ts
 - **Partner Directory**: table of integrated partners (e.g., Capital One, Stripe) displaying integration health and API usage stats
 - **Partner Dashboard (`/[id]`)**: detailed view featuring Recharts-powered graphs for 30-day API Requests (`requests`) and Latency (`latency_ms`) vs Errors
 - **API Keys & Webhooks**: interactive Client Components with Server Actions for securely rotating keys and registering webhook endpoint subscriptions
+
+### 10. System Events (`/system-events`)
+
+- **Live Event Stream**: real-time feed of system events (e.g. `payment.created`, `fraud.check.started`) with expandable JSON payloads
+- **Service Architecture Diagram**: visual representation of system microservices with real-time highlighting
+- **Payment Lifecycle Timeline**: temporal visualization of a payment's journey through various services
+- **Filtering**: filter events by service, status, or search by correlation ID
 
 ---
 

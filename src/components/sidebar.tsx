@@ -16,6 +16,7 @@ import {
     Sun,
     Moon,
     Network,
+    Radio,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -31,6 +32,7 @@ const navItems = [
     { label: 'Fraud Monitor', href: '/fraud-monitor', icon: ShieldAlert },
     { label: 'Dev Console', href: '/dev-console', icon: Terminal },
     { label: 'Partner Portal', href: '/partner-portal', icon: Network },
+    { label: 'System Events', href: '/system-events', icon: Radio },
 ];
 
 export default function Sidebar() {
