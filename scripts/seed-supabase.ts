@@ -259,6 +259,61 @@ for ( let i = 29; i >= 0; i-- ) {
     apiMetrics.push( { id: `met-xero-${i}`, partner_id: 'ptn-005', date: dateStr, requests: Math.floor( Math.random() * 30000 ) + 20000, errors: Math.floor( Math.random() * 20 ), latency_ms: Math.floor( Math.random() * 40 ) + 120 } );
 }
 
+// ─── Generate Ledger Entries ───────────────────────────────────────
+
+const ledgerEntries: Record<string, unknown>[] = [];
+let ledgerCounter = 1;
+
+for ( const payment of payments as { id: string; amount: number; vendor_name: string; created_at: string; status: string }[] ) {
+    if ( payment.status !== 'settled' && payment.status !== 'processing' ) continue;
+
+    const transactionId = `txn_${payment.id}`;
+
+    // Debit buyer_wallet (asset), Credit vendor_wallet (liability)
+    ledgerEntries.push( {
+        id: `ent-${pad( ledgerCounter++, 4 )}`,
+        transaction_id: transactionId,
+        account_id: 'acc_buyer',
+        account_name: 'buyer_wallet',
+        debit: payment.amount,
+        credit: null,
+        description: `Payment to ${payment.vendor_name}`,
+        created_at: payment.created_at,
+    } );
+    ledgerEntries.push( {
+        id: `ent-${pad( ledgerCounter++, 4 )}`,
+        transaction_id: transactionId,
+        account_id: 'acc_vendor',
+        account_name: 'vendor_wallet',
+        debit: null,
+        credit: payment.amount,
+        description: `Payment to ${payment.vendor_name}`,
+        created_at: payment.created_at,
+    } );
+}
+
+// ─── Generate Dev API Logs ─────────────────────────────────────────
+
+const devApiLogs: Record<string, unknown>[] = [];
+let devLogCounter = 1;
+
+for ( let i = 0; i < 15; i++ ) {
+    const isError = Math.random() > 0.8;
+    const method = Math.random() > 0.5 ? 'POST' : 'GET';
+    const endpoint = method === 'POST' ? '/api/dev/payments' : '/api/dev/keys';
+
+    devApiLogs.push( {
+        id: `log-${pad( devLogCounter++, 4 )}`,
+        endpoint,
+        method,
+        status_code: isError ? 400 : 200,
+        latency_ms: Math.floor( Math.random() * 300 ) + 50,
+        request_payload: method === 'POST' ? JSON.stringify( { amount: 5000, vendor_id: 'v-001' } ) : null,
+        response_payload: isError ? JSON.stringify( { error: 'Invalid payload' } ) : JSON.stringify( { success: true, id: `pay-${pad( Math.floor( Math.random() * 100 ), 3 )}` } ),
+        created_at: isoDate( addHours( new Date(), -Math.floor( Math.random() * 48 ) ) ),
+    } );
+}
+
 // ─── Insert into Supabase ──────────────────────────────────────────
 
 async function upsertBatch( table: string, rows: Record<string, unknown>[], batchSize = 200 ) {
@@ -295,6 +350,12 @@ async function main() {
     await upsertBatch( 'partner_webhook_subscriptions', webhookSubs );
     await upsertBatch( 'partner_api_metrics', apiMetrics );
     console.log( `✅ ${partners.length} partners (+ keys, webhooks, metrics)` );
+
+    await upsertBatch( 'ledger_entries', ledgerEntries );
+    console.log( `✅ ${ledgerEntries.length} ledger entries` );
+
+    await upsertBatch( 'dev_api_logs', devApiLogs );
+    console.log( `✅ ${devApiLogs.length} dev API logs` );
 
     console.log( '\n🎉 Seeding complete!' );
 }

@@ -1,6 +1,6 @@
 # Melio — SMB Vendor Payments Platform
 
-A modern fintech web application built with **React / Next.js 14**, **TypeScript**, **Tailwind CSS**, and **SQLite** that simulates a vendor payments platform similar to Melio or Bill.com.  It simulates these Accounts Payable/Receivable software for SMBs and Accountants
+A modern fintech web application built with **React / Next.js 14**, **TypeScript**, **Tailwind CSS**, and **Supabase PostgresDB**. It simulates a vendor payments platform similar to Melio or Bill.com, intended to be deployed on **Vercel**. It simulates these Accounts Payable/Receivable software for SMBs and Accountants
 
 ---
 
@@ -35,22 +35,31 @@ The application simulates a vendor payments platform using mock data and local A
 
 ### Design & Architecture
 
-The application features a clean, professional fintech UI with sidebar navigation and responsive layouts. It utilizes component-based architecture with reusable tables and charts, and is powered by realistic seeded SQLite database records fetched via local Next.js API Routes.
+The application features a clean, professional fintech UI with sidebar navigation and responsive layouts. It utilizes component-based architecture with reusable tables and charts, and is powered by realistic seeded Supabase PostgreSQL database records fetched via Next.js API Routes.
 
 ---
 
 ## Getting Started
 
+1. Add your Supabase keys to `.env.local`:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+   SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+   ```
+2. Run the SQL schema in `scripts/supabase-schema.sql` in your Supabase SQL editor.
+3. Install and seed:
+
 ```bash
 npm install
-npx tsx scripts/seed.ts   # seed the SQLite database
+npm run seed              # seed the Supabase database
 npm run dev               # → http://localhost:3000
 ```
 
 To re-seed the database with fresh randomized data at any time:
 
 ```bash
-npx tsx scripts/seed.ts
+npm run seed
 ```
 
 ---
@@ -59,11 +68,11 @@ npx tsx scripts/seed.ts
 
 | Layer | Files | Description |
 | ----- | ----- | ----------- |
-| **Database** | `src/lib/db.ts` | SQLite connection, schema init, row-to-camelCase mappers |
-| **Seed Script** | `scripts/seed.ts` | Generates ~30 vendors, ~100 invoices, ~65 payments, ~150 events, ~40 fraud alerts |
+| **Database** | `src/lib/db.ts` | Supabase client singleton, row-to-camelCase mappers |
+| **Seed Script** | `scripts/seed-supabase.ts` | Generates ~30 vendors, ~100 invoices, ~65 payments, ~150 events, ~40 fraud alerts |
 | **Types** | `src/lib/types.ts` | All domain entities (Vendor, Invoice, Payment, TransactionEvent, etc.) |
 | **Utilities** | `src/lib/utils.ts` | Currency formatting, date formatting, `cn()`, status colors |
-| **API Routes** | `src/app/api/` | REST endpoints querying SQLite (including fraud-monitor, dev-console) |
+| **API Routes** | `src/app/api/` | REST endpoints querying Supabase (including fraud-monitor, dev-console) |
 | **Components** | `src/components/` | Sidebar, DataTable, SummaryCard, StatusBadge, PageHeader, ThemeProvider, RiskScoreBar |
 | **Pages** | `src/app/` | 9 feature pages + vendor & partner detail pages |
 
@@ -159,9 +168,9 @@ The Retry Queue dashboard visualizes reliability engineering patterns, specifica
 
 ## Database
 
-All data is stored in a local **SQLite** database (`melio.db`) via `better-sqlite3`. The API routes run SQL queries directly — no ORM overhead.
+All data is stored in a **Supabase PostgreSQL** database. The API routes use `@supabase/supabase-js` to fetch and mutate data — minimizing ORM overhead and allowing seamless **Vercel** serverless deployment.
 
-The seed script (`scripts/seed.ts`) programmatically generates randomized but realistic data including:
+The seed script (`scripts/seed-supabase.ts`) programmatically generates randomized but realistic data including:
 
 - ~100+ invoices across all vendors with varying statuses
 - ~65 payments spanning the full lifecycle (draft → settled / failed)
@@ -179,10 +188,10 @@ The app ships with a **dark/light theme toggle** in the sidebar. The theme prefe
 
 ## Tech Stack
 
-- **Framework:** Next.js 14 (App Router)
+- **Framework:** Next.js 14 (App Router) deployed on **Vercel**
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
-- **Database:** SQLite via better-sqlite3
+- **Database:** **Supabase PostgresDB** via `@supabase/supabase-js`
 - **Charts:** Recharts
 - **Data Fetching:** TanStack React Query
 - **Icons:** Lucide React
