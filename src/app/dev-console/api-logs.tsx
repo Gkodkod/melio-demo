@@ -12,8 +12,8 @@ interface ApiLog {
     method: string;
     statusCode: number;
     latencyMs: number;
-    requestPayload: Record<string, any> | null;
-    responsePayload: Record<string, any> | null;
+    requestPayload: Record<string, unknown> | null;
+    responsePayload: Record<string, unknown> | null;
     createdAt: string;
 }
 

@@ -9,10 +9,8 @@ import {
     CheckCircle2,
     Search,
     X,
-    ArrowLeft,
     Building2,
     TrendingUp,
-    Shield,
     Zap,
 } from 'lucide-react';
 import {

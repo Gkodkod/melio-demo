@@ -52,11 +52,6 @@ interface VendorRiskSummary {
     velocityData: { name: string; volume: number; count: number }[];
 }
 
-const LEVEL_COLORS: Record<string, string> = {
-    high: '#ef4444',
-    medium: '#f59e0b',
-    low: '#10b981',
-};
 
 export default function VendorRiskPage() {
     const [search, setSearch] = useState( '' );
@@ -273,9 +268,9 @@ export default function VendorRiskPage() {
                                     }}
                                     labelStyle={{ color: '#94a3b8' }}
                                     cursor={{ fill: '#1e293b' }}
-                                    formatter={( value: any, name: any ) => {
+                                    formatter={( value: unknown, name: unknown ) => {
                                         if ( name === 'Volume' ) return formatCurrency( Number( value ) );
-                                        return value;
+                                        return value as string | number;
                                     }}
                                 />
                                 <Bar yAxisId="left" dataKey="volume" name="Volume" radius={[4, 4, 0, 0]}>

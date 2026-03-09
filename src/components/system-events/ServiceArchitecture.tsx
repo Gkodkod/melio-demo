@@ -3,7 +3,7 @@
 import { SystemEvent, ServiceType } from '@/types/system-events';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/components/theme-provider';
-import { Network, Database, ShieldCheck, Mail, ArrowRightLeft, Cpu } from 'lucide-react';
+import { Network, Database, ShieldCheck, Mail, Cpu } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface ServiceArchitectureProps {

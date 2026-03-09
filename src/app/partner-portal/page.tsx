@@ -2,7 +2,6 @@ import { Metadata } from 'next';
 import { getDb, mapPartner } from '@/lib/db';
 import { Partner } from '@/lib/types';
 import PageHeader from '@/components/page-header';
-import { Network } from 'lucide-react';
 import Link from 'next/link';
 import StatusBadge from '@/components/status-badge';
 
@@ -15,7 +14,7 @@ export default function PartnerPortalPage() {
     const db = getDb();
     // Fetch partners
     const rows = db.prepare( 'SELECT * FROM partners ORDER BY name ASC' ).all();
-    const partners = rows.map( ( r: any ) => mapPartner( r ) ) as Partner[];
+    const partners = rows.map( ( r ) => mapPartner( r as Record<string, unknown> ) ) as Partner[];
 
     return (
         <div className="space-y-6">

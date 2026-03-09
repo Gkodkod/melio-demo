@@ -28,7 +28,13 @@ export async function POST( request: Request ) {
         }
 
         requestPayload = await request.json();
-        const { amount, currency, vendor_id, payment_method, description } = requestPayload as any;
+        const { amount, currency, vendor_id, payment_method, description } = requestPayload as {
+            amount: number;
+            currency: string;
+            vendor_id: string;
+            payment_method: string;
+            description?: string;
+        };
 
         if ( !amount || !currency || !vendor_id || !payment_method ) {
             statusCode = 400;
@@ -68,9 +74,9 @@ export async function POST( request: Request ) {
 
         return NextResponse.json( responsePayload, { status: statusCode } );
 
-    } catch ( error: any ) {
+    } catch ( error: unknown ) {
         statusCode = 500;
-        responsePayload = { error: { message: error.message || 'Internal server error', type: 'api_error' } };
+        responsePayload = { error: { message: error instanceof Error ? error.message : 'Internal server error', type: 'api_error' } };
         return NextResponse.json( responsePayload, { status: statusCode } );
     } finally {
         const latencyMs = Date.now() - startTime;

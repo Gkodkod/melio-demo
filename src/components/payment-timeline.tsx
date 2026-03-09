@@ -35,7 +35,7 @@ interface TimelineEvent {
     timestamp: string | null;
     status: EventStatus;
     icon: React.ElementType;
-    payload: any;
+    payload: Record<string, unknown>;
 }
 
 const generateMockEvents = ( payment: Payment ): TimelineEvent[] => {

@@ -2,7 +2,7 @@ import { Metadata } from 'next';
 import { getDb, mapPartner, mapPartnerApiKey, mapPartnerWebhookSubscription, mapPartnerApiMetric } from '@/lib/db';
 import { Partner, PartnerApiKey, WebhookSubscription, ApiUsageMetric } from '@/lib/types';
 import PageHeader from '@/components/page-header';
-import { Network, Activity, CalendarClock, Globe } from 'lucide-react';
+import { Activity, CalendarClock, Globe } from 'lucide-react';
 import Link from 'next/link';
 import StatusBadge from '@/components/status-badge';
 import { notFound } from 'next/navigation';
@@ -19,16 +19,16 @@ export default function PartnerDetailPage( { params }: { params: { id: string } 
 
     const partnerRow = db.prepare( 'SELECT * FROM partners WHERE id = ?' ).get( params.id );
     if ( !partnerRow ) notFound();
-    const partner = mapPartner( partnerRow as any ) as Partner;
+    const partner = mapPartner( partnerRow as Record<string, unknown> ) as Partner;
 
     const keyRows = db.prepare( "SELECT * FROM partner_api_keys WHERE partner_id = ? ORDER BY created_at DESC" ).all( partner.id );
-    const apiKeys = keyRows.map( r => mapPartnerApiKey( r as any ) ) as PartnerApiKey[];
+    const apiKeys = keyRows.map( r => mapPartnerApiKey( r as Record<string, unknown> ) ) as PartnerApiKey[];
 
     const subRows = db.prepare( "SELECT * FROM partner_webhook_subscriptions WHERE partner_id = ? ORDER BY event_type ASC" ).all( partner.id );
-    const subscriptions = subRows.map( r => mapPartnerWebhookSubscription( r as any ) ) as WebhookSubscription[];
+    const subscriptions = subRows.map( r => mapPartnerWebhookSubscription( r as Record<string, unknown> ) ) as WebhookSubscription[];
 
     const metricRows = db.prepare( "SELECT * FROM partner_api_metrics WHERE partner_id = ? ORDER BY date ASC" ).all( partner.id );
-    const metrics = metricRows.map( r => mapPartnerApiMetric( r as any ) ) as ApiUsageMetric[];
+    const metrics = metricRows.map( r => mapPartnerApiMetric( r as Record<string, unknown> ) ) as ApiUsageMetric[];
 
     return (
         <div className="space-y-6">

@@ -3,7 +3,7 @@
 import { SystemEvent } from '@/types/system-events';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/components/theme-provider';
-import { CheckCircle2, Clock, AlertTriangle, AlertCircle, CircleDashed } from 'lucide-react';
+import { CheckCircle2, Clock, AlertCircle, CircleDashed } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface EventTimelineProps {
@@ -92,9 +92,8 @@ export default function EventTimeline( { correlationId, events }: EventTimelineP
 
             <div className="flex-1 p-6 overflow-y-auto">
                 <div className="relative pl-6 space-y-8 before:absolute before:inset-0 before:ml-8 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 dark:before:via-slate-700 before:to-transparent">
-                    {LIFECYCLE_STAGES.map( ( stage, index ) => {
+                    {LIFECYCLE_STAGES.map( ( stage ) => {
                         const { status, event } = getStageStatus( stage.id );
-                        const isLast = index === LIFECYCLE_STAGES.length - 1;
 
                         let Icon = CircleDashed;
                         let iconColor = isDark ? "text-slate-600 bg-slate-900" : "text-slate-400 bg-white";

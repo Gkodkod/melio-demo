@@ -6,7 +6,6 @@ import {
     Plus,
     Search,
     Calendar,
-    ArrowRight,
 } from 'lucide-react';
 import { useState } from 'react';
 import DataTable, { DataTableColumn } from '@/components/data-table';
@@ -16,7 +15,6 @@ import PaymentTimeline from '@/components/payment-timeline';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import type { Payment, Vendor, Invoice } from '@/lib/types';
 
-const LIFECYCLE_STEPS = ['draft', 'scheduled', 'processing', 'settled'] as const;
 
 export default function PaymentsPage() {
     const [search, setSearch] = useState( '' );
@@ -103,10 +101,6 @@ export default function PaymentsPage() {
 
     const statuses = ['all', 'draft', 'scheduled', 'processing', 'settled', 'failed'];
 
-    const getCurrentStep = ( status: string ) => {
-        if ( status === 'failed' ) return -1;
-        return LIFECYCLE_STEPS.indexOf( status as typeof LIFECYCLE_STEPS[number] );
-    };
 
     return (
         <div className="space-y-6 pt-8 lg:pt-0">

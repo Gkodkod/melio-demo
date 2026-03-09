@@ -1,7 +1,6 @@
-import { SystemEvent, ServiceType, EventStatus } from '@/types/system-events';
+import { SystemEvent } from '@/types/system-events';
 
 const generateId = () => Math.random().toString( 36 ).substring( 2, 10 );
-const nowTimestamp = () => new Date().toISOString();
 
 export const MOCK_EVENTS: SystemEvent[] = [
     {

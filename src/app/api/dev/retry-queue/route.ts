@@ -58,7 +58,8 @@ export async function POST( request: Request ) {
             const stmtUpdateFailed = db.prepare( `UPDATE retry_queue SET status = 'failed', updated_at = ? WHERE id = ?` );
             const stmtUpdatePending = db.prepare( `UPDATE retry_queue SET retry_attempts = ?, next_retry_at = ?, updated_at = ? WHERE id = ?` );
 
-            for ( const item of pendingItems as any[] ) {
+            interface RetryQueueRow { id: string; retry_attempts: number; }
+            for ( const item of pendingItems as RetryQueueRow[] ) {
                 processed++;
                 const currentAttempts = item.retry_attempts;
                 const newAttempts = currentAttempts + 1;
@@ -86,8 +87,8 @@ export async function POST( request: Request ) {
 
         return NextResponse.json( { error: 'Invalid action' }, { status: 400 } );
 
-    } catch ( error: any ) {
+    } catch ( error: unknown ) {
         console.error( 'Error in retry queue API:', error );
-        return NextResponse.json( { error: 'Action failed', details: error.message }, { status: 500 } );
+        return NextResponse.json( { error: 'Action failed', details: error instanceof Error ? error.message : String( error ) }, { status: 500 } );
     }
 }

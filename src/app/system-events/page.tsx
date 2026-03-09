@@ -7,7 +7,7 @@ import EventLog from '@/components/system-events/EventLog';
 import EventTimeline from '@/components/system-events/EventTimeline';
 import ServiceArchitecture from '@/components/system-events/ServiceArchitecture';
 import PageHeader from '@/components/page-header';
-import { Search, Filter, RefreshCw, Activity } from 'lucide-react';
+import { Search, Filter, Activity } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/components/theme-provider';
 

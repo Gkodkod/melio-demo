@@ -21,7 +21,8 @@ export async function GET() {
         GROUP BY v.id, v.name
     `;
 
-    const rows = db.prepare( vendorsQuery ).all() as any[];
+    interface VendorRow { id: string; name: string; vendorAge: string; totalVolume: number; payment_failures: number; high_value_payments: number; fraud_alerts: number; paymentCount: number; }
+    const rows = db.prepare( vendorsQuery ).all() as VendorRow[];
 
     const vendors = rows.map( r => {
         const score = ( r.payment_failures * 2 ) + ( r.fraud_alerts * 5 ) + ( r.high_value_payments * 1 );
@@ -63,7 +64,8 @@ export async function GET() {
         GROUP BY DATE(created_at)
         ORDER BY date ASC
     `;
-    const trendRows = db.prepare( historyQuery ).all() as any[];
+    interface TrendRow { date: string; highValue: number; }
+    const trendRows = db.prepare( historyQuery ).all() as TrendRow[];
 
     // Smooth out trend so it looks like "Risk Score" over time
     let cumulativeRisk = 10;

@@ -14,12 +14,12 @@ export interface SystemEvent {
     status: EventStatus;
     timestamp: string;
     correlationId: string;
-    payload: Record<string, any>;
+    payload: Record<string, unknown>;
     metadata: {
         durationMs?: number;
         userAgent?: string;
         ipAddress?: string;
         region?: string;
-        [key: string]: any;
+        [key: string]: unknown;
     };
 }

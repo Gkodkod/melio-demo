@@ -94,7 +94,7 @@ export default function Sidebar() {
                     </div>
                     <div>
                         <h1 className={cn( 'text-lg font-bold tracking-tight', isDark ? 'text-white' : 'text-slate-900' )}>
-                            Gal's Melio-Demo
+                            Gal&apos;s Melio-Demo
                         </h1>
                         <p className={cn( 'text-[10px] uppercase tracking-widest', isDark ? 'text-slate-400' : 'text-slate-500' )}>
                             Payments Platform

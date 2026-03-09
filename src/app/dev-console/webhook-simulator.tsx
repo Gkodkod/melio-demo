@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { Webhook, RefreshCw, Send, AlertCircle } from 'lucide-react';
+import { Webhook, RefreshCw, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/components/theme-provider';
 
 interface WebhookLog {
     id: string;
     eventType: string;
-    payload: Record<string, any>;
+    payload: Record<string, unknown>;
     status: string;
     deliveryAttempts: number;
     lastAttemptAt: string;

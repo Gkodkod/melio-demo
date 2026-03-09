@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { BookOpen, AlertCircle, ArrowUpRight, ArrowDownRight, RefreshCw, Wallet, Download, Search, Settings, Building, History, Scale } from 'lucide-react';
+import { BookOpen, AlertCircle, RefreshCw, Wallet, Search, Building, History, Scale } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/components/theme-provider';
 import PageHeader from '@/components/page-header';

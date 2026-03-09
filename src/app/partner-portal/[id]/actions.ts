@@ -27,7 +27,7 @@ export async function addWebhook( partnerId: string, eventType: string ) {
     try {
         db.prepare( 'INSERT INTO partner_webhook_subscriptions (id, partner_id, event_type, created_at) VALUES (?, ?, ?, ?)' ).run( id, partnerId, eventType, now );
         revalidatePath( `/partner-portal/${partnerId}` );
-    } catch ( e ) {
+    } catch {
         // Ignore if error occurs
     }
 }

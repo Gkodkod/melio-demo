@@ -66,9 +66,9 @@ export default function CreatePayment() {
             const data = await res.json();
             setStatus( res.status );
             setResponseJson( JSON.stringify( data, null, 2 ) );
-        } catch ( error: any ) {
+        } catch ( error: unknown ) {
             setStatus( 500 );
-            setResponseJson( JSON.stringify( { error: error.message }, null, 2 ) );
+            setResponseJson( JSON.stringify( { error: error instanceof Error ? error.message : String( error ) }, null, 2 ) );
         } finally {
             setLoading( false );
         }

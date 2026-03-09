@@ -48,7 +48,7 @@ export async function POST( request: Request ) {
         const now = new Date().toISOString();
 
         // Execute the entire double-entry transaction atomically
-        const tx = db.transaction( ( txEntries: any[], txnDesc: string ) => {
+        const tx = db.transaction( ( txEntries: { accountId: string; debit?: number; credit?: number }[], txnDesc: string ) => {
             const results = [];
             for ( const entry of txEntries ) {
                 // Get account name for denormalization
@@ -96,8 +96,8 @@ export async function POST( request: Request ) {
         const recordedEntries = tx( entries, description );
 
         return NextResponse.json( { success: true, transactionId, entries: recordedEntries } );
-    } catch ( error: any ) {
+    } catch ( error: unknown ) {
         console.error( 'Error creating ledger entries:', error );
-        return NextResponse.json( { error: error.message || 'Internal server error' }, { status: 500 } );
+        return NextResponse.json( { error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 } );
     }
 }
