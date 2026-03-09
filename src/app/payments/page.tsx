@@ -1,13 +1,14 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
     CreditCard,
     Plus,
     Search,
     Calendar,
+    Loader2
 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import DataTable, { DataTableColumn } from '@/components/data-table';
 import StatusBadge from '@/components/status-badge';
 import PageHeader from '@/components/page-header';
@@ -17,10 +18,22 @@ import type { Payment, Vendor, Invoice } from '@/lib/types';
 
 
 export default function PaymentsPage() {
+    const queryClient = useQueryClient();
     const [search, setSearch] = useState( '' );
     const [filterStatus, setFilterStatus] = useState<string>( 'all' );
     const [showCreateModal, setShowCreateModal] = useState( false );
     const [showDetailModal, setShowDetailModal] = useState<Payment | null>( null );
+
+    const today = new Date().toISOString().split( 'T' )[0];
+    const [createForm, setCreateForm] = useState( {
+        vendorId: '',
+        invoiceId: '',
+        amount: '',
+        paymentMethod: 'ach',
+        scheduledDate: today
+    } );
+    const [isSubmitting, setIsSubmitting] = useState( false );
+    const [submitError, setSubmitError] = useState( '' );
 
     const { data: payments = [], isLoading } = useQuery<Payment[]>( {
         queryKey: ['payments'],
@@ -36,6 +49,53 @@ export default function PaymentsPage() {
         queryKey: ['invoices'],
         queryFn: () => fetch( '/api/invoices' ).then( ( r ) => r.json() ),
     } );
+
+    useEffect( () => {
+        if ( createForm.invoiceId ) {
+            const inv = invoices.find( i => i.id === createForm.invoiceId );
+            if ( inv && ( !createForm.amount || parseFloat( createForm.amount ) === inv.amount ) ) {
+                setCreateForm( prev => ( { ...prev, amount: inv.amount.toString() } ) );
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [createForm.invoiceId, invoices] );
+
+    const handleCreatePayment = async () => {
+        setSubmitError( '' );
+        if ( !createForm.vendorId || !createForm.invoiceId || !createForm.amount || !createForm.scheduledDate ) {
+            setSubmitError( 'Please fill out all required fields' );
+            return;
+        }
+
+        setIsSubmitting( true );
+        try {
+            const response = await fetch( '/api/payments', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify( {
+                    vendorId: createForm.vendorId,
+                    invoiceId: createForm.invoiceId,
+                    amount: parseFloat( createForm.amount ),
+                    paymentMethod: createForm.paymentMethod,
+                    scheduledDate: createForm.scheduledDate,
+                } ),
+            } );
+
+            if ( !response.ok ) {
+                const res = await response.json();
+                throw new Error( res.error || 'Failed to create payment' );
+            }
+
+            // Success
+            queryClient.invalidateQueries( { queryKey: ['payments'] } );
+            setShowCreateModal( false );
+            setCreateForm( { vendorId: '', invoiceId: '', amount: '', paymentMethod: 'ach', scheduledDate: today } );
+        } catch ( err: unknown ) {
+            setSubmitError( err instanceof Error ? err.message : String( err ) );
+        } finally {
+            setIsSubmitting( false );
+        }
+    };
 
     const filtered = payments.filter( ( p ) => {
         const matchesSearch =
@@ -162,10 +222,21 @@ export default function PaymentsPage() {
                     <div className="bg-slate-900 border border-slate-700 rounded-2xl p-8 max-w-lg w-full shadow-2xl" onClick={( e ) => e.stopPropagation()}>
                         <h2 className="text-xl font-bold text-white mb-2">Create Payment</h2>
                         <p className="text-sm text-slate-400 mb-6">Set up a new vendor payment</p>
+
+                        {submitError && (
+                            <div className="mb-4 p-3 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-sm">
+                                {submitError}
+                            </div>
+                        )}
+
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1.5">Select Vendor</label>
-                                <select className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                                <label className="block text-sm font-medium text-slate-300 mb-1.5">Select Vendor <span className="text-rose-400">*</span></label>
+                                <select
+                                    className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                                    value={createForm.vendorId}
+                                    onChange={( e ) => setCreateForm( { ...createForm, vendorId: e.target.value } )}
+                                >
                                     <option value="">Choose a vendor...</option>
                                     {vendors.map( ( v ) => (
                                         <option key={v.id} value={v.id}>{v.name}</option>
@@ -173,33 +244,71 @@ export default function PaymentsPage() {
                                 </select>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1.5">Select Invoice</label>
-                                <select className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+                                <label className="block text-sm font-medium text-slate-300 mb-1.5">Select Invoice <span className="text-rose-400">*</span></label>
+                                <select
+                                    className="w-full px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                                    value={createForm.invoiceId}
+                                    onChange={( e ) => setCreateForm( { ...createForm, invoiceId: e.target.value } )}
+                                    disabled={!createForm.vendorId}
+                                >
                                     <option value="">Choose an invoice...</option>
-                                    {invoices.filter( ( i ) => i.status === 'approved' ).map( ( i ) => (
+                                    {invoices.filter( ( i ) => i.status === 'approved' && ( !createForm.vendorId || i.vendorId === createForm.vendorId ) ).map( ( i ) => (
                                         <option key={i.id} value={i.id}>{i.invoiceNumber} — {formatCurrency( i.amount )}</option>
                                     ) )}
                                 </select>
                             </div>
-                            <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1.5">Payment Method</label>
-                                <div className="flex gap-3">
-                                    <button className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-indigo-600/10 text-indigo-400 ring-1 ring-indigo-500/30 text-sm font-semibold">
-                                        <CreditCard size={16} /> ACH
-                                    </button>
-                                    <button className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-slate-800 text-slate-400 ring-1 ring-slate-700 text-sm font-semibold hover:ring-indigo-500/30 transition-all">
-                                        <CreditCard size={16} /> Card
-                                    </button>
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium text-slate-300 mb-1.5">Amount (Partial allowed) <span className="text-rose-400">*</span></label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">$</span>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            className="w-full pl-8 pr-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                                            value={createForm.amount}
+                                            onChange={( e ) => setCreateForm( { ...createForm, amount: e.target.value } )}
+                                            placeholder="0.00"
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex-1">
+                                    <label className="block text-sm font-medium text-slate-300 mb-1.5">Schedule Date <span className="text-rose-400">*</span></label>
+                                    <div className="relative">
+                                        <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" />
+                                        <input
+                                            type="date"
+                                            min={today}
+                                            className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 [color-scheme:dark]"
+                                            value={createForm.scheduledDate}
+                                            onChange={( e ) => setCreateForm( { ...createForm, scheduledDate: e.target.value } )}
+                                        />
+                                    </div>
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-slate-300 mb-1.5">Schedule Date</label>
-                                <div className="relative">
-                                    <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                                    <input
-                                        type="date"
-                                        className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                                    />
+                                <label className="block text-sm font-medium text-slate-300 mb-1.5">Payment Method</label>
+                                <div className="flex gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => setCreateForm( { ...createForm, paymentMethod: 'ach' } )}
+                                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl ring-1 text-sm font-semibold transition-all ${createForm.paymentMethod === 'ach'
+                                            ? 'bg-indigo-600/10 text-indigo-400 ring-indigo-500/30'
+                                            : 'bg-slate-800 text-slate-400 ring-slate-700 hover:ring-indigo-500/30'
+                                            }`}
+                                    >
+                                        <CreditCard size={16} /> ACH
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setCreateForm( { ...createForm, paymentMethod: 'card' } )}
+                                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-xl ring-1 text-sm font-semibold transition-all ${createForm.paymentMethod === 'card'
+                                            ? 'bg-indigo-600/10 text-indigo-400 ring-indigo-500/30'
+                                            : 'bg-slate-800 text-slate-400 ring-slate-700 hover:ring-indigo-500/30'
+                                            }`}
+                                    >
+                                        <CreditCard size={16} /> Card
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -207,14 +316,16 @@ export default function PaymentsPage() {
                             <button
                                 onClick={() => setShowCreateModal( false )}
                                 className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold border border-slate-700 text-slate-300 hover:bg-slate-800 transition-colors"
+                                disabled={isSubmitting}
                             >
                                 Cancel
                             </button>
                             <button
-                                onClick={() => setShowCreateModal( false )}
-                                className="flex-1 px-4 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20"
+                                onClick={handleCreatePayment}
+                                disabled={isSubmitting}
+                                className="flex-1 flex justify-center items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-indigo-600 text-white hover:bg-indigo-500 transition-colors shadow-lg shadow-indigo-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                Create Payment
+                                {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : 'Create Payment'}
                             </button>
                         </div>
                     </div>

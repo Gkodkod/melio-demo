@@ -75,7 +75,7 @@ export default function VendorsPage() {
         <div className="space-y-6 pt-8 lg:pt-0">
             <PageHeader
                 title="Vendors"
-                description="Manage your vendor relationships and payment methods"
+                description="Manage your vendor relationships and payment methods. Click on a vendor name to view their details."
                 action={
                     <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-indigo-500/20">
                         <Plus size={16} />
