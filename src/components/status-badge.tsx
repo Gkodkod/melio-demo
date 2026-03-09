@@ -16,6 +16,9 @@ const statusStyles: Record<string, string> = {
     rejected: 'bg-red-500/10 text-red-400 ring-red-500/20',
     paid: 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20',
     verified: 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20',
+    investigating: 'bg-amber-500/10 text-amber-400 ring-amber-500/20',
+    cleared: 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/20',
+    confirmed: 'bg-red-500/10 text-red-400 ring-red-500/20',
 };
 
 export default function StatusBadge( { status, className }: StatusBadgeProps ) {

@@ -138,6 +138,12 @@ interface ReconciliationRecord {
     difference: number; matched: number; batch_id: string; settled_date: string;
 }
 
+interface FraudAlertRow {
+    id: string; payment_id: string; vendor_id: string; vendor_name: string;
+    amount: number; risk_score: number; risk_level: string;
+    triggered_rules: string; status: string; flagged_at: string;
+}
+
 // Generate vendors
 const vendors: Vendor[] = companyNames.map( ( name, i ) => {
     const method = Math.random() > 0.3 ? 'ach' : 'card';
@@ -334,6 +340,70 @@ for ( const [dateKey, batchPayments] of Object.entries( batchGroups ) ) {
     }
 }
 
+// ─── Generate fraud alerts ─────────────────────────────────────────
+
+const fraudRuleNames = [
+    'High Amount',
+    'New Vendor + High Amount',
+    'Rapid Payments',
+    'International Vendor',
+    'Round Amount',
+    'Failed Then Retry',
+];
+
+const fraudStatuses = ['pending', 'pending', 'pending', 'investigating', 'investigating', 'cleared', 'confirmed'];
+
+const fraudAlerts: FraudAlertRow[] = [];
+let fraudCounter = 1;
+
+// Pick a subset of payments to flag
+const shuffledPayments = [...payments].sort( () => Math.random() - 0.5 );
+const flaggedCount = Math.min( Math.floor( payments.length * 0.4 ), 55 );
+
+for ( let i = 0; i < flaggedCount; i++ ) {
+    const payment = shuffledPayments[i];
+    const vendor = vendors.find( ( v ) => v.id === payment.vendor_id )!;
+
+    // Determine triggered rules based on payment characteristics
+    const triggered: string[] = [];
+    if ( payment.amount > 10000 ) triggered.push( 'High Amount' );
+    if ( payment.amount > 5000 ) {
+        const vendorAge = new Date( payment.created_at ).getTime() - new Date( vendor.created_at ).getTime();
+        if ( vendorAge < 30 * 24 * 60 * 60 * 1000 ) triggered.push( 'New Vendor + High Amount' );
+    }
+    if ( payment.amount >= 1000 && payment.amount % 1000 === 0 ) triggered.push( 'Round Amount' );
+    if ( payment.status === 'failed' ) triggered.push( 'Failed Then Retry' );
+
+    // If no rules triggered naturally, assign 1-2 random rules
+    if ( triggered.length === 0 ) {
+        const count = Math.random() > 0.5 ? 2 : 1;
+        const available = [...fraudRuleNames].sort( () => Math.random() - 0.5 );
+        for ( let k = 0; k < count; k++ ) triggered.push( available[k] );
+    }
+
+    // Compute risk score with some randomness
+    const baseScore = triggered.length * 20 + Math.floor( Math.random() * 25 );
+    const riskScore = Math.min( 100, Math.max( 10, baseScore ) );
+    const riskLevel = riskScore >= 60 ? 'high' : riskScore >= 30 ? 'medium' : 'low';
+
+    // Spread flagged dates over the last 90 days
+    const daysAgo = Math.floor( Math.random() * 90 );
+    const flaggedAt = addDays( new Date( '2026-03-08' ), -daysAgo );
+
+    fraudAlerts.push( {
+        id: `fa-${pad( fraudCounter++, 3 )}`,
+        payment_id: payment.id,
+        vendor_id: vendor.id,
+        vendor_name: vendor.name,
+        amount: payment.amount,
+        risk_score: riskScore,
+        risk_level: riskLevel,
+        triggered_rules: JSON.stringify( triggered ),
+        status: randomPick( fraudStatuses ),
+        flagged_at: isoDate( flaggedAt ),
+    } );
+}
+
 // ─── Insert into SQLite ────────────────────────────────────────────
 
 console.log( '🗄️  Opening database…' );
@@ -343,6 +413,7 @@ db.pragma( 'foreign_keys = OFF' ); // disable during bulk insert
 
 // Drop existing tables for clean re-seed
 db.exec( `
+  DROP TABLE IF EXISTS fraud_alerts;
   DROP TABLE IF EXISTS reconciliation_records;
   DROP TABLE IF EXISTS transaction_events;
   DROP TABLE IF EXISTS payments;
@@ -384,6 +455,12 @@ db.exec( `
     difference REAL NOT NULL, matched INTEGER NOT NULL DEFAULT 1,
     batch_id TEXT NOT NULL, settled_date TEXT NOT NULL
   );
+  CREATE TABLE fraud_alerts (
+    id TEXT PRIMARY KEY, payment_id TEXT NOT NULL, vendor_id TEXT NOT NULL,
+    vendor_name TEXT NOT NULL, amount REAL NOT NULL, risk_score INTEGER NOT NULL,
+    risk_level TEXT NOT NULL, triggered_rules TEXT NOT NULL,
+    status TEXT NOT NULL, flagged_at TEXT NOT NULL
+  );
 `);
 
 // Insert data
@@ -392,6 +469,7 @@ const insertInvoice = db.prepare( `INSERT INTO invoices VALUES (?,?,?,?,?,?,?,?,
 const insertPayment = db.prepare( `INSERT INTO payments VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)` );
 const insertEvent = db.prepare( `INSERT INTO transaction_events VALUES (?,?,?,?,?,?,?,?,?)` );
 const insertRec = db.prepare( `INSERT INTO reconciliation_records VALUES (?,?,?,?,?,?,?,?,?,?,?)` );
+const insertFraud = db.prepare( `INSERT INTO fraud_alerts VALUES (?,?,?,?,?,?,?,?,?,?)` );
 
 const insertAll = db.transaction( () => {
     for ( const v of vendors ) {
@@ -409,6 +487,9 @@ const insertAll = db.transaction( () => {
     for ( const r of reconciliation ) {
         insertRec.run( r.id, r.invoice_id, r.invoice_number, r.payment_id, r.vendor_name, r.invoice_amount, r.payment_amount, r.difference, r.matched, r.batch_id, r.settled_date );
     }
+    for ( const f of fraudAlerts ) {
+        insertFraud.run( f.id, f.payment_id, f.vendor_id, f.vendor_name, f.amount, f.risk_score, f.risk_level, f.triggered_rules, f.status, f.flagged_at );
+    }
 } );
 
 insertAll();
@@ -420,3 +501,4 @@ console.log( `   ${invoices.length} invoices` );
 console.log( `   ${payments.length} payments` );
 console.log( `   ${events.length} transaction events` );
 console.log( `   ${reconciliation.length} reconciliation records` );
+console.log( `   ${fraudAlerts.length} fraud alerts` );

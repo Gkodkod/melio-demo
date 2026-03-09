@@ -9,6 +9,7 @@ import {
     CreditCard,
     Activity,
     Scale,
+    ShieldAlert,
     Menu,
     X,
     Sun,
@@ -25,6 +26,7 @@ const navItems = [
     { label: 'Payments', href: '/payments', icon: CreditCard },
     { label: 'Transactions', href: '/transactions', icon: Activity },
     { label: 'Reconciliation', href: '/reconciliation', icon: Scale },
+    { label: 'Fraud Monitor', href: '/fraud-monitor', icon: ShieldAlert },
 ];
 
 export default function Sidebar() {
@@ -80,7 +82,7 @@ export default function Sidebar() {
                     </div>
                     <div>
                         <h1 className={cn( 'text-lg font-bold tracking-tight', isDark ? 'text-white' : 'text-slate-900' )}>
-                            Melio-Demo
+                            Gal's Melio-Demo
                         </h1>
                         <p className={cn( 'text-[10px] uppercase tracking-widest', isDark ? 'text-slate-400' : 'text-slate-500' )}>
                             Payments Platform

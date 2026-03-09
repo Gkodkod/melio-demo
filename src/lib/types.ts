@@ -86,3 +86,30 @@ export interface DashboardSummary {
   totalVolume: number;
   pendingVolume: number;
 }
+
+// ─── Fraud Monitoring Types ────────────────────────────────────────
+
+export type RiskLevel = 'low' | 'medium' | 'high';
+export type FraudAlertStatus = 'pending' | 'investigating' | 'cleared' | 'confirmed';
+
+export interface FraudAlert {
+  id: string;
+  paymentId: string;
+  vendorId: string;
+  vendorName: string;
+  amount: number;
+  riskScore: number;
+  riskLevel: RiskLevel;
+  triggeredRules: string[];
+  status: FraudAlertStatus;
+  flaggedAt: string;
+}
+
+export interface FraudDashboardSummary {
+  totalFlagged: number;
+  highRiskCount: number;
+  pendingReview: number;
+  clearedToday: number;
+  riskTrend: { date: string; count: number; avgScore: number }[];
+  ruleStats: { rule: string; triggerCount: number }[];
+}

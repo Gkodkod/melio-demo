@@ -86,6 +86,19 @@ function initSchema( db: Database.Database ) {
       batch_id TEXT NOT NULL,
       settled_date TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS fraud_alerts (
+      id TEXT PRIMARY KEY,
+      payment_id TEXT NOT NULL REFERENCES payments(id),
+      vendor_id TEXT NOT NULL REFERENCES vendors(id),
+      vendor_name TEXT NOT NULL,
+      amount REAL NOT NULL,
+      risk_score INTEGER NOT NULL,
+      risk_level TEXT NOT NULL CHECK(risk_level IN ('low', 'medium', 'high')),
+      triggered_rules TEXT NOT NULL,
+      status TEXT NOT NULL CHECK(status IN ('pending', 'investigating', 'cleared', 'confirmed')),
+      flagged_at TEXT NOT NULL
+    );
   `);
 }
 
@@ -170,5 +183,20 @@ export function mapReconciliation( row: Record<string, unknown> ) {
         matched: Boolean( row.matched ),
         batchId: row.batch_id,
         settledDate: row.settled_date,
+    };
+}
+
+export function mapFraudAlert( row: Record<string, unknown> ) {
+    return {
+        id: row.id,
+        paymentId: row.payment_id,
+        vendorId: row.vendor_id,
+        vendorName: row.vendor_name,
+        amount: row.amount,
+        riskScore: row.risk_score,
+        riskLevel: row.risk_level,
+        triggeredRules: JSON.parse( row.triggered_rules as string ),
+        status: row.status,
+        flaggedAt: row.flagged_at,
     };
 }
