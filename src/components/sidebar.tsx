@@ -19,6 +19,7 @@ import {
     Radio,
     BookOpen,
     Clock,
+    Target,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -33,6 +34,7 @@ const navItems = [
     { label: 'Ledger', href: '/ledger', icon: BookOpen },
     { label: 'Reconciliation', href: '/reconciliation', icon: Scale },
     { label: 'Fraud Monitor', href: '/fraud-monitor', icon: ShieldAlert },
+    { label: 'Vendor Risk', href: '/vendor-risk', icon: Target },
     { label: 'Dev Console', href: '/dev-console', icon: Terminal },
     { label: 'Partner Portal', href: '/partner-portal', icon: Network },
     { label: 'System Events', href: '/system-events', icon: Radio },

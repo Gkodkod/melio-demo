@@ -19,7 +19,14 @@ The application simulates a vendor payments platform using mock data and local A
 4.  **Payments** — create payment, select vendor and invoice, choose payment method, schedule payment, payment status lifecycle: draft → scheduled → processing → settled → failed
 5.  **Transactions Feed** — event-style log similar to Stripe webhooks tracking payment lifecycle events
 6.  **Reconciliation Page** — table showing invoice amount vs payment amount, settlement batch grouping, highlight mismatches
-7.  **Fraud Monitor** — suspicious activity detection, risk scoring rules engine, flagged transactions table, vendor risk profiling
+
+### 🛡️ Fraud Detection & Risk Monitoring
+- **Real-time Fraud Monitor**: Flag suspicious payments dynamically.
+- **Rule-based Engine**: Evaluates volume spikes, high-risk countries, and frequent failures.
+- **Vendor-Level Risk Model**: Scores vendors dynamically using the formula:
+  $$ \text{Risk Score} = (\text{Failures} \times 2) + (\text{Fraud Alerts} \times 5) + (\text{High Value} \times 1) $$
+- **Anomaly Detection**: Flags behavioral patterns like payment frequency vs. volume anomalies.
+- **Risk Dashboards**: Global and vendor-level visualizations (trends & velocity).
 8.  **Dev Console** — mock developer API console for generating API keys, simulating payments, viewing request logs, and triggering mock webhooks
 9.  **Partner Portal** — simulator for onboarding external partners, monitoring their API usage, managing webhook connections, and rotating partner API keys
 10. **System Events** — real-time event log and service telemetry dashboard with timeline and architecture visualizations
