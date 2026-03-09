@@ -164,7 +164,7 @@ export default function SystemEventsDashboard() {
                 <div className="xl:col-span-2 flex flex-col gap-6 h-full">
 
                     {/* Top Half: Architecture Diagram */}
-                    <div className="h-[320px] shrink-0">
+                    <div className="h-[360px] shrink-0">
                         <ServiceArchitecture events={events} />
                     </div>
 
