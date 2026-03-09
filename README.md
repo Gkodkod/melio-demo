@@ -1,36 +1,96 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Melio — Vendor Payments Platform
+
+A modern fintech web application built with **Next.js 14**, **TypeScript**, and **Tailwind CSS** that simulates a vendor payments platform similar to Melio or Bill.com using mocked data and local API routes.
+
+---
+
+## Original Prompt
+
+> Build a modern fintech web application using Next.js 14, TypeScript, and Tailwind.
+>
+> The app should simulate a vendor payments platform similar to Melio or Bill.com using mocked data and local API routes.
+>
+> Main goal: demonstrate a realistic payments workflow and financial dashboard.
+>
+> **Features:**
+>
+> 1. **Dashboard** — summary cards for total payments, pending payments, completed payments, and failed payments; recent activity feed showing payment events; charts for payment volume and status distribution
+> 2. **Vendors** — vendor list table, vendor details page, payment method info (ACH or card), mock bank verification status
+> 3. **Invoices** — invoice list, upload invoice (mock), invoice approval workflow, attach invoice to vendor
+> 4. **Payments** — create payment, select vendor and invoice, choose payment method, schedule payment, payment status lifecycle: draft → scheduled → processing → settled → failed
+> 5. **Transactions Feed** — event-style log similar to Stripe webhooks: payment.created, payment.processing, payment.settled, payment.failed
+> 6. **Reconciliation Page** — table showing invoice amount vs payment amount, settlement batch grouping, highlight mismatches
+>
+> **Technical requirements:** Next.js App Router, TypeScript, Tailwind UI, mock REST API routes in Next.js, React Query or SWR for data fetching, component-based architecture, reusable tables and charts, realistic seeded mock data (vendors, invoices, payments)
+>
+> **Design:** clean fintech UI similar to Stripe, Melio, or Bill.com; sidebar navigation; professional dashboard layout; responsive design
+
+---
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# → http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Layer | Files | Description |
+|-------|-------|-------------|
+| **Types** | `src/lib/types.ts` | All domain entities (Vendor, Invoice, Payment, TransactionEvent, etc.) |
+| **Mock Data** | `src/lib/mock-data.ts` | 8 vendors, 10 invoices, 8 payments, 12 events, 6 reconciliation records |
+| **Utilities** | `src/lib/utils.ts` | Currency formatting, date formatting, `cn()`, status colors |
+| **API Routes** | `src/app/api/` | 7 REST endpoints: vendors, invoices, payments, transactions, reconciliation, dashboard |
+| **Components** | `src/components/` | Sidebar, DataTable, SummaryCard, StatusBadge, PageHeader, Providers |
+| **Pages** | `src/app/` | 6 feature pages + vendor detail page |
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Feature Pages
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 1. Dashboard (`/`)
+- 4 gradient summary cards (Total, Pending, Completed, Failed)
+- Area chart showing 7-month payment volume trend
+- Donut pie chart for status distribution
+- Recent activity feed with event type icons
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 2. Vendors (`/vendors` + `/vendors/[id]`)
+- Searchable vendor table with bank verification status badges
+- Detail page with contact info, payment method, bank info, verification status
+- Related invoices and payments tables per vendor
 
-## Deploy on Vercel
+### 3. Invoices (`/invoices`)
+- Filterable by status (all, pending, approved, rejected, paid)
+- **Upload Invoice** modal with drag-and-drop area
+- **Approval workflow** modal showing invoice details with Approve/Reject actions
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 4. Payments (`/payments`)
+- **Create Payment** modal: select vendor, invoice, payment method (ACH/Card), schedule date
+- **Payment detail** modal with lifecycle stepper: Draft → Scheduled → Processing → Settled
+- Failed payments show error reason with red highlight
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### 5. Transactions (`/transactions`)
+- Stripe-style webhook event log with event type badges
+- Filterable: `payment.created`, `payment.processing`, `payment.settled`, `payment.failed`
+- Shows timestamp, payment ID, vendor, amount, and failure reasons
+
+### 6. Reconciliation (`/reconciliation`)
+- Summary cards: Total Records, Matched, Mismatches, Net Difference
+- Settlement **batch grouping** (e.g., `BATCH-2026-0308-A`)
+- Invoice amount vs payment amount comparison with **mismatch highlighting**
+
+---
+
+## Tech Stack
+
+- **Framework:** Next.js 14 (App Router)
+- **Language:** TypeScript
+- **Styling:** Tailwind CSS
+- **Charts:** Recharts
+- **Data Fetching:** TanStack React Query
+- **Icons:** Lucide React
+- **Date Utilities:** date-fns
