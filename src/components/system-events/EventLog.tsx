@@ -69,7 +69,7 @@ export default function EventLog( { events, onEventClick, selectedCorrelationId 
                 </div>
             </div>
 
-            <div className="flex-1 overflow-auto divide-y divide-slate-100 dark:divide-slate-800 p-2 space-y-1 relative">
+            <div className="flex-1 overflow-auto min-h-0 divide-y divide-slate-100 dark:divide-slate-800 p-2 space-y-1 relative">
                 {events.length === 0 ? (
                     <div className={cn( "p-8 text-center text-sm", isDark ? "text-slate-500" : "text-slate-400" )}>
                         No events found matching your filter.

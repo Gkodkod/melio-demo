@@ -190,11 +190,20 @@ export const MOCK_EVENTS: SystemEvent[] = [
 
 export const generateRandomEvent = (): SystemEvent => {
     const correlationId = `txn_${Math.floor( Math.random() * 1000000000 )}`;
+    const templates = [
+        { type: 'payment.created', service: 'API Gateway', status: 'info' },
+        { type: 'fraud.check.started', service: 'Fraud Service', status: 'info' },
+        { type: 'payment.authorized', service: 'Payment Service', status: 'success' },
+        { type: 'payment.settlement.started', service: 'Settlement Service', status: 'info' },
+        { type: 'notification.sent', service: 'Notification Service', status: 'success' }
+    ] as const;
+    const tpl = templates[Math.floor( Math.random() * templates.length )];
+
     return {
         id: generateId(),
-        type: 'payment.created',
-        service: 'API Gateway',
-        status: 'info',
+        type: tpl.type,
+        service: tpl.service,
+        status: tpl.status,
         timestamp: new Date().toISOString(),
         correlationId,
         payload: {

@@ -26,7 +26,7 @@ export default function EventTimeline( { correlationId, events }: EventTimelineP
     if ( !correlationId ) {
         return (
             <div className={cn(
-                "rounded-xl border shadow-sm p-8 h-full flex flex-col items-center justify-center text-center",
+                "rounded-xl border shadow-sm p-4 pt-10 h-full flex flex-col items-center justify-start text-center",
                 isDark ? "bg-slate-900 border-slate-800" : "bg-white border-slate-200"
             )}>
                 <div className={cn( "w-16 h-16 rounded-full flex items-center justify-center mb-4",
@@ -90,7 +90,7 @@ export default function EventTimeline( { correlationId, events }: EventTimelineP
                 </p>
             </div>
 
-            <div className="flex-1 p-6 overflow-y-auto">
+            <div className="flex-1 p-6 overflow-y-auto min-h-0">
                 <div className="relative pl-6 space-y-8 before:absolute before:inset-0 before:ml-8 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-300 dark:before:via-slate-700 before:to-transparent">
                     {LIFECYCLE_STAGES.map( ( stage ) => {
                         const { status, event } = getStageStatus( stage.id );
