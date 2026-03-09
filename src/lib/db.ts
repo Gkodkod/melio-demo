@@ -1,238 +1,20 @@
-import Database from 'better-sqlite3';
-import path from 'path';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
-const DB_PATH = path.join( process.cwd(), 'melio.db' );
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
 
-let _db: Database.Database | null = null;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnySupabase = SupabaseClient<any, any, any>;
+let _client: AnySupabase | null = null;
 
-export function getDb(): Database.Database {
-  if ( !_db ) {
-    _db = new Database( DB_PATH );
-    _db.pragma( 'journal_mode = WAL' );
-    _db.pragma( 'foreign_keys = ON' );
-    initSchema( _db );
-    seedLedgerIfEmpty( _db );
+// Server-side client using service role key (bypasses RLS — for API routes only)
+export function getDb(): AnySupabase {
+  if ( !_client ) {
+    _client = createClient( supabaseUrl, supabaseServiceKey, {
+      auth: { persistSession: false },
+    } ) as AnySupabase;
   }
-  return _db;
-}
-
-function seedLedgerIfEmpty( db: Database.Database ) {
-  try {
-    const accCount = db.prepare( 'SELECT COUNT(*) as count FROM ledger_accounts' ).get() as { count: number };
-    if ( accCount.count === 0 ) {
-      const now = new Date().toISOString();
-
-      // Create accounts
-      db.exec( `
-                INSERT INTO ledger_accounts (id, name, type, balance, created_at) VALUES 
-                ('acc_buyer', 'buyer_wallet', 'asset', 50000.00, '${now}'),
-                ('acc_vendor', 'vendor_wallet', 'liability', 0.00, '${now}'),
-                ('acc_capital', 'external_capital', 'equity', -50000.00, '${now}');
-            ` );
-
-      // Create initial funding transaction
-      const txnId = 'txn_init_' + Date.now();
-      db.exec( `
-                INSERT INTO ledger_entries (id, transaction_id, account_id, account_name, debit, credit, description, created_at) VALUES 
-                ('ent_${Date.now()}_1', '${txnId}', 'acc_buyer', 'buyer_wallet', 50000.00, NULL, 'Initial platform funding', '${now}'),
-                ('ent_${Date.now()}_2', '${txnId}', 'acc_capital', 'external_capital', NULL, 50000.00, 'Initial platform funding', '${now}');
-            ` );
-    }
-  } catch ( error ) {
-    console.error( 'Error seeding ledger:', error );
-  }
-}
-
-function initSchema( db: Database.Database ) {
-  db.exec( `
-    CREATE TABLE IF NOT EXISTS vendors (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL,
-      phone TEXT NOT NULL,
-      address TEXT NOT NULL,
-      payment_method TEXT NOT NULL CHECK(payment_method IN ('ach', 'card')),
-      bank_name TEXT,
-      account_last4 TEXT NOT NULL,
-      routing_number TEXT,
-      bank_verification_status TEXT NOT NULL CHECK(bank_verification_status IN ('verified', 'pending', 'failed')),
-      created_at TEXT NOT NULL,
-      total_paid REAL NOT NULL DEFAULT 0
-    );
-
-    CREATE TABLE IF NOT EXISTS invoices (
-      id TEXT PRIMARY KEY,
-      vendor_id TEXT NOT NULL REFERENCES vendors(id),
-      vendor_name TEXT NOT NULL,
-      invoice_number TEXT NOT NULL,
-      amount REAL NOT NULL,
-      due_date TEXT NOT NULL,
-      status TEXT NOT NULL CHECK(status IN ('pending', 'approved', 'rejected', 'paid')),
-      description TEXT NOT NULL,
-      file_name TEXT,
-      created_at TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS payments (
-      id TEXT PRIMARY KEY,
-      vendor_id TEXT NOT NULL REFERENCES vendors(id),
-      vendor_name TEXT NOT NULL,
-      invoice_id TEXT NOT NULL REFERENCES invoices(id),
-      invoice_number TEXT NOT NULL,
-      amount REAL NOT NULL,
-      payment_method TEXT NOT NULL CHECK(payment_method IN ('ach', 'card')),
-      status TEXT NOT NULL CHECK(status IN ('draft', 'scheduled', 'processing', 'settled', 'failed')),
-      scheduled_date TEXT NOT NULL,
-      processed_date TEXT,
-      settled_date TEXT,
-      failure_reason TEXT,
-      created_at TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS transaction_events (
-      id TEXT PRIMARY KEY,
-      payment_id TEXT NOT NULL REFERENCES payments(id),
-      type TEXT NOT NULL CHECK(type IN ('payment.created', 'payment.processing', 'payment.settled', 'payment.failed')),
-      vendor_name TEXT NOT NULL,
-      amount REAL NOT NULL,
-      payment_method TEXT NOT NULL,
-      status TEXT NOT NULL,
-      failure_reason TEXT,
-      timestamp TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS reconciliation_records (
-      id TEXT PRIMARY KEY,
-      invoice_id TEXT NOT NULL REFERENCES invoices(id),
-      invoice_number TEXT NOT NULL,
-      payment_id TEXT NOT NULL REFERENCES payments(id),
-      vendor_name TEXT NOT NULL,
-      invoice_amount REAL NOT NULL,
-      payment_amount REAL NOT NULL,
-      difference REAL NOT NULL,
-      matched INTEGER NOT NULL DEFAULT 1,
-      batch_id TEXT NOT NULL,
-      settled_date TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS fraud_alerts (
-      id TEXT PRIMARY KEY,
-      payment_id TEXT NOT NULL REFERENCES payments(id),
-      vendor_id TEXT NOT NULL REFERENCES vendors(id),
-      vendor_name TEXT NOT NULL,
-      amount REAL NOT NULL,
-      risk_score INTEGER NOT NULL,
-      risk_level TEXT NOT NULL CHECK(risk_level IN ('low', 'medium', 'high')),
-      triggered_rules TEXT NOT NULL,
-      status TEXT NOT NULL CHECK(status IN ('pending', 'investigating', 'cleared', 'confirmed')),
-      flagged_at TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS dev_api_keys (
-      id TEXT PRIMARY KEY,
-      publishable_key TEXT NOT NULL UNIQUE,
-      secret_key TEXT NOT NULL UNIQUE,
-      name TEXT NOT NULL,
-      status TEXT NOT NULL CHECK(status IN ('active', 'revoked')),
-      created_at TEXT NOT NULL,
-      last_used_at TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS dev_api_logs (
-      id TEXT PRIMARY KEY,
-      endpoint TEXT NOT NULL,
-      method TEXT NOT NULL CHECK(method IN ('GET', 'POST', 'PUT', 'DELETE', 'PATCH')),
-      status_code INTEGER NOT NULL,
-      latency_ms INTEGER NOT NULL,
-      request_payload TEXT,
-      response_payload TEXT,
-      created_at TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS dev_webhook_logs (
-      id TEXT PRIMARY KEY,
-      event_type TEXT NOT NULL,
-      payload TEXT NOT NULL,
-      status TEXT NOT NULL CHECK(status IN ('pending', 'delivered', 'failed')),
-      delivery_attempts INTEGER NOT NULL DEFAULT 0,
-      last_attempt_at TEXT,
-      next_retry_at TEXT,
-      created_at TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS idempotency_keys (
-      key TEXT PRIMARY KEY,
-      endpoint TEXT NOT NULL,
-      response_payload TEXT NOT NULL,
-      created_at TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS partners (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      status TEXT NOT NULL CHECK(status IN ('active', 'inactive', 'suspended')),
-      integration_status TEXT NOT NULL CHECK(integration_status IN ('healthy', 'degraded', 'offline')),
-      api_usage INTEGER NOT NULL DEFAULT 0,
-      webhook_url TEXT,
-      created_at TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS partner_api_keys (
-      id TEXT PRIMARY KEY,
-      partner_id TEXT NOT NULL REFERENCES partners(id),
-      key_value TEXT NOT NULL UNIQUE,
-      status TEXT NOT NULL CHECK(status IN ('active', 'revoked')),
-      created_at TEXT NOT NULL,
-      last_used_at TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS partner_webhook_subscriptions (
-      id TEXT PRIMARY KEY,
-      partner_id TEXT NOT NULL REFERENCES partners(id),
-      event_type TEXT NOT NULL,
-      created_at TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS partner_api_metrics (
-      id TEXT PRIMARY KEY,
-      partner_id TEXT NOT NULL REFERENCES partners(id),
-      date TEXT NOT NULL,
-      requests INTEGER NOT NULL DEFAULT 0,
-      errors INTEGER NOT NULL DEFAULT 0,
-      latency_ms INTEGER NOT NULL DEFAULT 0
-    );
-
-    CREATE TABLE IF NOT EXISTS ledger_accounts (
-      id TEXT PRIMARY KEY,
-      name TEXT NOT NULL UNIQUE,
-      type TEXT NOT NULL CHECK(type IN ('asset', 'liability', 'equity', 'revenue', 'expense')),
-      balance REAL NOT NULL DEFAULT 0,
-      created_at TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS ledger_entries (
-      id TEXT PRIMARY KEY,
-      transaction_id TEXT NOT NULL,
-      account_id TEXT NOT NULL REFERENCES ledger_accounts(id),
-      account_name TEXT NOT NULL,
-      debit REAL,
-      credit REAL,
-      description TEXT NOT NULL,
-      created_at TEXT NOT NULL
-    );
-
-    CREATE TABLE IF NOT EXISTS retry_queue (
-      id TEXT PRIMARY KEY,
-      payment_id TEXT NOT NULL,
-      error_message TEXT NOT NULL,
-      retry_attempts INTEGER NOT NULL DEFAULT 0,
-      next_retry_at TEXT NOT NULL,
-      backoff_policy TEXT NOT NULL,
-      status TEXT NOT NULL CHECK(status IN ('pending', 'processing', 'resolved', 'failed')),
-      created_at TEXT NOT NULL,
-      updated_at TEXT NOT NULL
-    );
-  `);
+  return _client;
 }
 
 // ─── Row → camelCase mappers ───────────────────────────────────────
@@ -328,7 +110,9 @@ export function mapFraudAlert( row: Record<string, unknown> ) {
     amount: row.amount,
     riskScore: row.risk_score,
     riskLevel: row.risk_level,
-    triggeredRules: JSON.parse( row.triggered_rules as string ),
+    triggeredRules: typeof row.triggered_rules === 'string'
+      ? JSON.parse( row.triggered_rules )
+      : row.triggered_rules,
     status: row.status,
     flaggedAt: row.flagged_at,
   };
@@ -363,7 +147,7 @@ export function mapDevWebhookLog( row: Record<string, unknown> ) {
   return {
     id: row.id,
     eventType: row.event_type,
-    payload: JSON.parse( row.payload as string ),
+    payload: typeof row.payload === 'string' ? JSON.parse( row.payload ) : row.payload,
     status: row.status,
     deliveryAttempts: row.delivery_attempts,
     lastAttemptAt: row.last_attempt_at,

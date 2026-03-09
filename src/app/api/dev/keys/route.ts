@@ -4,21 +4,28 @@ import crypto from 'crypto';
 
 export async function GET() {
     try {
-        const db = getDb();
-        const rows = db.prepare( `SELECT * FROM dev_api_keys WHERE status = 'active'` ).all() as Record<string, unknown>[];
-        const keys = rows.map( mapDevApiKey );
+        const supabase = getDb();
+        const { data: rows, error } = await supabase
+            .from( 'dev_api_keys' )
+            .select( '*' )
+            .eq( 'status', 'active' );
+        if ( error ) throw error;
 
-        // If no keys exist, create a default set
+        const keys = ( rows ?? [] ).map( r => mapDevApiKey( r as Record<string, unknown> ) );
+
         if ( keys.length === 0 ) {
             const newKey = generateNewKey();
-            db.prepare( `
-                INSERT INTO dev_api_keys (id, publishable_key, secret_key, name, status, created_at)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ` ).run( newKey.id, newKey.publishableKey, newKey.secretKey, newKey.name, newKey.status, newKey.createdAt );
-
+            const { error: insertErr } = await supabase.from( 'dev_api_keys' ).insert( {
+                id: newKey.id,
+                publishable_key: newKey.publishableKey,
+                secret_key: newKey.secretKey,
+                name: newKey.name,
+                status: newKey.status,
+                created_at: newKey.createdAt,
+            } );
+            if ( insertErr ) throw insertErr;
             return NextResponse.json( [newKey] );
         }
-
         return NextResponse.json( keys );
     } catch ( error ) {
         console.error( 'Error fetching API keys:', error );
@@ -30,20 +37,25 @@ export async function POST( request: Request ) {
     try {
         const body = await request.json();
         const { action } = body;
-
-        const db = getDb();
+        const supabase = getDb();
 
         if ( action === 'rotate' ) {
-            // Revoke all existing
-            db.prepare( `UPDATE dev_api_keys SET status = 'revoked' WHERE status = 'active'` ).run();
+            const { error: revokeErr } = await supabase
+                .from( 'dev_api_keys' )
+                .update( { status: 'revoked' } )
+                .eq( 'status', 'active' );
+            if ( revokeErr ) throw revokeErr;
 
-            // Create new
             const newKey = generateNewKey();
-            db.prepare( `
-                INSERT INTO dev_api_keys (id, publishable_key, secret_key, name, status, created_at)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ` ).run( newKey.id, newKey.publishableKey, newKey.secretKey, newKey.name, newKey.status, newKey.createdAt );
-
+            const { error: insertErr } = await supabase.from( 'dev_api_keys' ).insert( {
+                id: newKey.id,
+                publishable_key: newKey.publishableKey,
+                secret_key: newKey.secretKey,
+                name: newKey.name,
+                status: newKey.status,
+                created_at: newKey.createdAt,
+            } );
+            if ( insertErr ) throw insertErr;
             return NextResponse.json( newKey );
         }
 

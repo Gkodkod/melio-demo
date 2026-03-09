@@ -5,10 +5,12 @@ export async function GET(
     _request: Request,
     { params }: { params: { id: string } }
 ) {
-    const db = getDb();
-    const row = db.prepare( 'SELECT * FROM vendors WHERE id = ?' ).get( params.id );
-    if ( !row ) {
-        return NextResponse.json( { error: 'Vendor not found' }, { status: 404 } );
-    }
-    return NextResponse.json( mapVendor( row as Record<string, unknown> ) );
+    const supabase = getDb();
+    const { data, error } = await supabase
+        .from( 'vendors' )
+        .select( '*' )
+        .eq( 'id', params.id )
+        .single();
+    if ( error || !data ) return NextResponse.json( { error: 'Vendor not found' }, { status: 404 } );
+    return NextResponse.json( mapVendor( data as Record<string, unknown> ) );
 }

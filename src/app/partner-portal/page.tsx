@@ -10,11 +10,11 @@ export const metadata: Metadata = {
     description: 'Manage external partner integrations.',
 };
 
-export default function PartnerPortalPage() {
-    const db = getDb();
-    // Fetch partners
-    const rows = db.prepare( 'SELECT * FROM partners ORDER BY name ASC' ).all();
-    const partners = rows.map( ( r ) => mapPartner( r as Record<string, unknown> ) ) as Partner[];
+export default async function PartnerPortalPage() {
+    const supabase = getDb();
+    const { data: rows } = await supabase
+        .from( 'partners' ).select( '*' ).order( 'name', { ascending: true } );
+    const partners = ( rows ?? [] ).map( ( r: Record<string, unknown> ) => mapPartner( r ) ) as Partner[];
 
     return (
         <div className="space-y-6">
@@ -66,7 +66,7 @@ export default function PartnerPortalPage() {
                                         {new Intl.NumberFormat().format( p.apiUsage )}
                                     </td>
                                     <td className="px-6 text-right text-slate-500 dark:text-slate-400 tabular-nums">
-                                        {new Date( p.createdAt ).toLocaleDateString()}
+                                        {new Date( p.createdAt as string ).toLocaleDateString()}
                                     </td>
                                 </tr>
                             ) )}

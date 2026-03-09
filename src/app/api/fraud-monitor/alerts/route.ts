@@ -2,7 +2,11 @@ import { NextResponse } from 'next/server';
 import { getDb, mapFraudAlert } from '@/lib/db';
 
 export async function GET() {
-    const db = getDb();
-    const rows = db.prepare( 'SELECT * FROM fraud_alerts ORDER BY risk_score DESC' ).all();
-    return NextResponse.json( rows.map( ( r ) => mapFraudAlert( r as Record<string, unknown> ) ) );
+    const supabase = getDb();
+    const { data, error } = await supabase
+        .from( 'fraud_alerts' )
+        .select( '*' )
+        .order( 'risk_score', { ascending: false } );
+    if ( error ) return NextResponse.json( { error: error.message }, { status: 500 } );
+    return NextResponse.json( ( data ?? [] ).map( ( r ) => mapFraudAlert( r as Record<string, unknown> ) ) );
 }

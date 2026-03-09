@@ -2,20 +2,32 @@ import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 
 export async function GET() {
-    const db = getDb();
+    const supabase = getDb();
 
-    const total = ( db.prepare( 'SELECT COUNT(*) as c FROM payments' ).get() as { c: number } ).c;
-    const pending = ( db.prepare( "SELECT COUNT(*) as c FROM payments WHERE status IN ('scheduled', 'draft')" ).get() as { c: number } ).c;
-    const completed = ( db.prepare( "SELECT COUNT(*) as c FROM payments WHERE status = 'settled'" ).get() as { c: number } ).c;
-    const failed = ( db.prepare( "SELECT COUNT(*) as c FROM payments WHERE status = 'failed'" ).get() as { c: number } ).c;
-    const totalVolume = ( db.prepare( 'SELECT COALESCE(SUM(amount), 0) as s FROM payments' ).get() as { s: number } ).s;
-    const pendingVolume = ( db.prepare( "SELECT COALESCE(SUM(amount), 0) as s FROM payments WHERE status IN ('scheduled', 'draft', 'processing')" ).get() as { s: number } ).s;
+    const [
+        { count: total },
+        { count: pending },
+        { count: completed },
+        { count: failed },
+        { data: volumeAll },
+        { data: volumePending },
+    ] = await Promise.all( [
+        supabase.from( 'payments' ).select( '*', { count: 'exact', head: true } ),
+        supabase.from( 'payments' ).select( '*', { count: 'exact', head: true } ).in( 'status', ['scheduled', 'draft'] ),
+        supabase.from( 'payments' ).select( '*', { count: 'exact', head: true } ).eq( 'status', 'settled' ),
+        supabase.from( 'payments' ).select( '*', { count: 'exact', head: true } ).eq( 'status', 'failed' ),
+        supabase.from( 'payments' ).select( 'amount' ),
+        supabase.from( 'payments' ).select( 'amount' ).in( 'status', ['scheduled', 'draft', 'processing'] ),
+    ] );
+
+    const totalVolume = ( volumeAll ?? [] ).reduce( ( sum: number, r: { amount: number } ) => sum + ( r.amount ?? 0 ), 0 );
+    const pendingVolume = ( volumePending ?? [] ).reduce( ( sum: number, r: { amount: number } ) => sum + ( r.amount ?? 0 ), 0 );
 
     return NextResponse.json( {
-        totalPayments: total,
-        pendingPayments: pending,
-        completedPayments: completed,
-        failedPayments: failed,
+        totalPayments: total ?? 0,
+        pendingPayments: pending ?? 0,
+        completedPayments: completed ?? 0,
+        failedPayments: failed ?? 0,
         totalVolume,
         pendingVolume,
     } );

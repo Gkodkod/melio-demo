@@ -17,10 +17,15 @@ export async function POST( request: Request ) {
         }
 
         const idempotencyKey = request.headers.get( 'Idempotency-Key' );
-        const db = getDb();
+        const supabase = getDb();
 
         if ( idempotencyKey ) {
-            const existingKey = db.prepare( 'SELECT response_payload FROM idempotency_keys WHERE key = ? AND endpoint = ?' ).get( idempotencyKey, '/api/dev/payments' ) as { response_payload: string } | undefined;
+            const { data: existingKey } = await supabase
+                .from( 'idempotency_keys' )
+                .select( 'response_payload' )
+                .eq( 'key', idempotencyKey )
+                .eq( 'endpoint', '/api/dev/payments' )
+                .single();
             if ( existingKey ) {
                 responsePayload = JSON.parse( existingKey.response_payload );
                 return NextResponse.json( responsePayload, { status: 200 } );
@@ -29,11 +34,7 @@ export async function POST( request: Request ) {
 
         requestPayload = await request.json();
         const { amount, currency, vendor_id, payment_method, description } = requestPayload as {
-            amount: number;
-            currency: string;
-            vendor_id: string;
-            payment_method: string;
-            description?: string;
+            amount: number; currency: string; vendor_id: string; payment_method: string; description?: string;
         };
 
         if ( !amount || !currency || !vendor_id || !payment_method ) {
@@ -42,34 +43,22 @@ export async function POST( request: Request ) {
             return NextResponse.json( responsePayload, { status: statusCode } );
         }
 
-        // Simulate processing time
         await new Promise( resolve => setTimeout( resolve, 600 + Math.random() * 400 ) );
 
         const paymentId = `pi_${crypto.randomBytes( 12 ).toString( 'hex' )}`;
-
         responsePayload = {
-            id: paymentId,
-            object: 'payment_intent',
-            amount,
-            currency,
-            vendor_id,
-            payment_method,
-            description: description || null,
-            status: 'succeeded',
-            created: Math.floor( Date.now() / 1000 ),
-            livemode: false,
+            id: paymentId, object: 'payment_intent', amount, currency, vendor_id,
+            payment_method, description: description || null, status: 'succeeded',
+            created: Math.floor( Date.now() / 1000 ), livemode: false,
         };
 
         if ( idempotencyKey ) {
-            db.prepare( `
-                INSERT INTO idempotency_keys (key, endpoint, response_payload, created_at)
-                VALUES (?, ?, ?, ?)
-            ` ).run(
-                idempotencyKey,
-                '/api/dev/payments',
-                JSON.stringify( responsePayload ),
-                new Date().toISOString()
-            );
+            await supabase.from( 'idempotency_keys' ).insert( {
+                key: idempotencyKey,
+                endpoint: '/api/dev/payments',
+                response_payload: JSON.stringify( responsePayload ),
+                created_at: new Date().toISOString(),
+            } );
         }
 
         return NextResponse.json( responsePayload, { status: statusCode } );
@@ -81,20 +70,17 @@ export async function POST( request: Request ) {
     } finally {
         const latencyMs = Date.now() - startTime;
         try {
-            const db = getDb();
-            db.prepare( `
-                INSERT INTO dev_api_logs (id, endpoint, method, status_code, latency_ms, request_payload, response_payload, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ` ).run(
-                crypto.randomUUID(),
-                '/v1/payment_intents',
-                'POST',
-                statusCode,
-                latencyMs,
-                requestPayload ? JSON.stringify( requestPayload ) : null,
-                responsePayload ? JSON.stringify( responsePayload ) : null,
-                new Date().toISOString()
-            );
+            const supabase = getDb();
+            await supabase.from( 'dev_api_logs' ).insert( {
+                id: crypto.randomUUID(),
+                endpoint: '/v1/payment_intents',
+                method: 'POST',
+                status_code: statusCode,
+                latency_ms: latencyMs,
+                request_payload: requestPayload ? JSON.stringify( requestPayload ) : null,
+                response_payload: responsePayload ? JSON.stringify( responsePayload ) : null,
+                created_at: new Date().toISOString(),
+            } );
         } catch ( logError ) {
             console.error( 'Failed to log API request:', logError );
         }

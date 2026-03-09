@@ -2,105 +2,86 @@ import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 
 export async function GET() {
-    const db = getDb();
+    const supabase = getDb();
 
-    // 1. Get vendor scores
-    // vendor_risk_score = payment_failures * 2 + fraud_alerts * 5 + high_value_payments (amount > 10000)
-    const vendorsQuery = `
-        SELECT 
-            v.id, 
-            v.name, 
-            v.created_at as vendorAge,
-            v.total_paid as totalVolume,
-            COALESCE(SUM(CASE WHEN p.status = 'failed' THEN 1 ELSE 0 END), 0) as payment_failures,
-            COALESCE(SUM(CASE WHEN p.amount > 10000 THEN 1 ELSE 0 END), 0) as high_value_payments,
-            (SELECT COUNT(*) FROM fraud_alerts fa WHERE fa.vendor_id = v.id) as fraud_alerts,
-            COUNT(p.id) as paymentCount
-        FROM vendors v
-        LEFT JOIN payments p ON p.vendor_id = v.id
-        GROUP BY v.id, v.name
-    `;
+    // Fetch all vendors, payments, and fraud_alerts in parallel
+    const [
+        { data: vendorRows },
+        { data: paymentRows },
+        { data: fraudRows },
+    ] = await Promise.all( [
+        supabase.from( 'vendors' ).select( 'id, name, created_at, total_paid' ),
+        supabase.from( 'payments' ).select( 'vendor_id, amount, status, created_at' ),
+        supabase.from( 'fraud_alerts' ).select( 'vendor_id' ),
+    ] );
 
-    interface VendorRow { id: string; name: string; vendorAge: string; totalVolume: number; payment_failures: number; high_value_payments: number; fraud_alerts: number; paymentCount: number; }
-    const rows = db.prepare( vendorsQuery ).all() as VendorRow[];
+    interface VendorRiskRow { id: string; name: string; created_at: string; total_paid: number }
+    interface PaymentRiskRow { vendor_id: string; amount: number; status: string; created_at: string }
 
-    const vendors = rows.map( r => {
-        const score = ( r.payment_failures * 2 ) + ( r.fraud_alerts * 5 ) + ( r.high_value_payments * 1 );
+    const vendors = ( vendorRows ?? [] ) as VendorRiskRow[];
+    const payments = ( paymentRows ?? [] ) as PaymentRiskRow[];
+    const fraudAlerts = ( fraudRows ?? [] ) as { vendor_id: string }[];
+
+    // Thirty-day cutoff
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate( thirtyDaysAgo.getDate() - 30 );
+    const cutoff = thirtyDaysAgo.toISOString();
+
+    const result = vendors.map( v => {
+        const vPayments = payments.filter( p => p.vendor_id === v.id );
+        const paymentFailures = vPayments.filter( p => p.status === 'failed' ).length;
+        const highValuePayments = vPayments.filter( p => p.amount > 10000 ).length;
+        const fraudAlertsCount = fraudAlerts.filter( f => f.vendor_id === v.id ).length;
+        const paymentCount = vPayments.length;
+
+        const score = ( paymentFailures * 2 ) + ( fraudAlertsCount * 5 ) + ( highValuePayments * 1 );
         let riskLevel = 'low';
         if ( score >= 20 ) riskLevel = 'high';
         else if ( score >= 10 ) riskLevel = 'medium';
 
-        // Anomaly Detection: simple heuristic (e.g. multiple failures or recent high score)
-        const anomalies = [];
-        if ( r.payment_failures > 2 ) anomalies.push( 'Frequent payment failures' );
-        if ( r.fraud_alerts > 1 ) anomalies.push( 'Multiple fraud alerts flagged' );
-        if ( r.high_value_payments > 5 && r.paymentCount < 10 ) anomalies.push( 'High value ratio anomaly' );
+        const anomalies: string[] = [];
+        if ( paymentFailures > 2 ) anomalies.push( 'Frequent payment failures' );
+        if ( fraudAlertsCount > 1 ) anomalies.push( 'Multiple fraud alerts flagged' );
+        if ( highValuePayments > 5 && paymentCount < 10 ) anomalies.push( 'High value ratio anomaly' );
 
         return {
-            id: r.id,
-            name: r.name,
-            totalVolume: r.totalVolume,
-            paymentCount: r.paymentCount,
-            metrics: {
-                paymentFailures: r.payment_failures,
-                highValueCount: r.high_value_payments,
-                fraudAlerts: r.fraud_alerts,
-            },
+            id: v.id,
+            name: v.name,
+            totalVolume: v.total_paid,
+            paymentCount,
+            metrics: { paymentFailures, highValueCount: highValuePayments, fraudAlerts: fraudAlertsCount },
             score,
             riskLevel,
             anomalies,
-            vendorAge: r.vendorAge,
+            vendorAge: v.created_at,
         };
     } );
 
-    // 2. Risk History (trend over last 30 days)
-    // We mock this by aggregating historical payment failures or fraud alerts by date to project trend
-    const historyQuery = `
-        SELECT 
-            DATE(created_at) as date,
-            COUNT(*) as highValue
-        FROM payments
-        WHERE amount > 10000 AND created_at >= DATE('now', '-30 days')
-        GROUP BY DATE(created_at)
-        ORDER BY date ASC
-    `;
-    interface TrendRow { date: string; highValue: number; }
-    const trendRows = db.prepare( historyQuery ).all() as TrendRow[];
-
-    // Smooth out trend so it looks like "Risk Score" over time
+    // Risk history trend — last 30 days from payments
+    const recentHighValue = payments.filter( p => p.amount > 10000 && p.created_at >= cutoff );
+    const trendMap: Record<string, number> = {};
+    for ( const p of recentHighValue ) {
+        const date = p.created_at.slice( 0, 10 );
+        trendMap[date] = ( trendMap[date] || 0 ) + 1;
+    }
     let cumulativeRisk = 10;
-    const riskHistory = trendRows.map( tr => {
-        cumulativeRisk += ( tr.highValue * 0.5 ); // artificial fluctuation based on high value
-        if ( cumulativeRisk > 100 ) cumulativeRisk = 100;
-        return {
-            date: tr.date,
-            avgScore: parseFloat( cumulativeRisk.toFixed( 1 ) )
-        };
-    } );
+    const riskHistory = Object.entries( trendMap )
+        .sort( ( [a], [b] ) => a.localeCompare( b ) )
+        .map( ( [date, highValue] ) => {
+            cumulativeRisk = Math.min( 100, cumulativeRisk + highValue * 0.5 );
+            return { date, avgScore: parseFloat( cumulativeRisk.toFixed( 1 ) ) };
+        } );
 
-    // Handle empty trace case
     if ( riskHistory.length === 0 ) {
         for ( let i = 29; i >= 0; i-- ) {
             const d = new Date();
             d.setDate( d.getDate() - i );
-            riskHistory.push( {
-                date: d.toISOString().slice( 0, 10 ),
-                avgScore: 5 + Math.random() * 5
-            } );
+            riskHistory.push( { date: d.toISOString().slice( 0, 10 ), avgScore: 5 + Math.random() * 5 } );
         }
     }
 
-    // 3. Payment Velocity (Volume & Frequency) per vendor for top 5 risky vendors
-    const topRisky = vendors.sort( ( a, b ) => b.score - a.score ).slice( 0, 5 );
-    const velocityData = topRisky.map( v => ( {
-        name: v.name,
-        volume: v.totalVolume,
-        count: v.paymentCount
-    } ) );
+    const topRisky = [...result].sort( ( a, b ) => b.score - a.score ).slice( 0, 5 );
+    const velocityData = topRisky.map( v => ( { name: v.name, volume: v.totalVolume, count: v.paymentCount } ) );
 
-    return NextResponse.json( {
-        vendors,
-        riskHistory,
-        velocityData
-    } );
+    return NextResponse.json( { vendors: result, riskHistory, velocityData } );
 }

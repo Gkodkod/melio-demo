@@ -14,21 +14,27 @@ export const metadata: Metadata = {
     title: 'Partner Detail | Melio',
 };
 
-export default function PartnerDetailPage( { params }: { params: { id: string } } ) {
-    const db = getDb();
+export default async function PartnerDetailPage( { params }: { params: { id: string } } ) {
+    const supabase = getDb();
 
-    const partnerRow = db.prepare( 'SELECT * FROM partners WHERE id = ?' ).get( params.id );
+    const { data: partnerRow } = await supabase
+        .from( 'partners' ).select( '*' ).eq( 'id', params.id ).single();
     if ( !partnerRow ) notFound();
     const partner = mapPartner( partnerRow as Record<string, unknown> ) as Partner;
 
-    const keyRows = db.prepare( "SELECT * FROM partner_api_keys WHERE partner_id = ? ORDER BY created_at DESC" ).all( partner.id );
-    const apiKeys = keyRows.map( r => mapPartnerApiKey( r as Record<string, unknown> ) ) as PartnerApiKey[];
+    const [
+        { data: keyRows },
+        { data: subRows },
+        { data: metricRows },
+    ] = await Promise.all( [
+        supabase.from( 'partner_api_keys' ).select( '*' ).eq( 'partner_id', partner.id ).order( 'created_at', { ascending: false } ),
+        supabase.from( 'partner_webhook_subscriptions' ).select( '*' ).eq( 'partner_id', partner.id ).order( 'event_type', { ascending: true } ),
+        supabase.from( 'partner_api_metrics' ).select( '*' ).eq( 'partner_id', partner.id ).order( 'date', { ascending: true } ),
+    ] );
 
-    const subRows = db.prepare( "SELECT * FROM partner_webhook_subscriptions WHERE partner_id = ? ORDER BY event_type ASC" ).all( partner.id );
-    const subscriptions = subRows.map( r => mapPartnerWebhookSubscription( r as Record<string, unknown> ) ) as WebhookSubscription[];
-
-    const metricRows = db.prepare( "SELECT * FROM partner_api_metrics WHERE partner_id = ? ORDER BY date ASC" ).all( partner.id );
-    const metrics = metricRows.map( r => mapPartnerApiMetric( r as Record<string, unknown> ) ) as ApiUsageMetric[];
+    const apiKeys = ( keyRows ?? [] ).map( ( r: Record<string, unknown> ) => mapPartnerApiKey( r ) ) as PartnerApiKey[];
+    const subscriptions = ( subRows ?? [] ).map( ( r: Record<string, unknown> ) => mapPartnerWebhookSubscription( r ) ) as WebhookSubscription[];
+    const metrics = ( metricRows ?? [] ).map( ( r: Record<string, unknown> ) => mapPartnerApiMetric( r ) ) as ApiUsageMetric[];
 
     return (
         <div className="space-y-6">
@@ -81,7 +87,7 @@ export default function PartnerDetailPage( { params }: { params: { id: string } 
                     <div>
                         <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Partner Since</p>
                         <p className="text-xl font-bold text-slate-900 dark:text-white">
-                            {new Date( partner.createdAt ).toLocaleDateString()}
+                            {new Date( partner.createdAt as string ).toLocaleDateString()}
                         </p>
                     </div>
                 </div>
@@ -91,7 +97,7 @@ export default function PartnerDetailPage( { params }: { params: { id: string } 
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full items-stretch">
                 <ApiKeysManager partnerId={partner.id} apiKeys={apiKeys} />
-                <WebhookManager partnerId={partner.id} webhookUrl={partner.webhookUrl || ""} subscriptions={subscriptions} />
+                <WebhookManager partnerId={partner.id} webhookUrl={partner.webhookUrl as string || ''} subscriptions={subscriptions} />
             </div>
         </div>
     );

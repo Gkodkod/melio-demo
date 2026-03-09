@@ -3,10 +3,13 @@ import { getDb, mapLedgerAccount } from '@/lib/db';
 
 export async function GET() {
     try {
-        const db = getDb();
-        const rows = db.prepare( 'SELECT * FROM ledger_accounts ORDER BY name ASC' ).all();
-        const accounts = rows.map( row => mapLedgerAccount( row as Record<string, unknown> ) );
-
+        const supabase = getDb();
+        const { data, error } = await supabase
+            .from( 'ledger_accounts' )
+            .select( '*' )
+            .order( 'name', { ascending: true } );
+        if ( error ) return NextResponse.json( { error: error.message }, { status: 500 } );
+        const accounts = ( data ?? [] ).map( row => mapLedgerAccount( row as Record<string, unknown> ) );
         return NextResponse.json( { accounts } );
     } catch ( error ) {
         console.error( 'Error fetching ledger accounts:', error );
