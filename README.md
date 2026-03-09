@@ -13,13 +13,13 @@ The application simulates a vendor payments platform using mock data and local A
 1. **Dashboard** — summary cards for total payments, pending payments, completed payments, and failed payments; recent activity feed showing payment events; charts for payment volume and status distribution
 2. **Vendors** — vendor list table, vendor details page, payment method info (ACH or card), mock bank verification status
 3. **Invoices** — invoice list, mock invoice upload, invoice approval workflow, attach invoice to vendor
-1.  **Dashboard** — summary cards for total payments, pending payments, completed payments, and failed payments; recent activity feed showing payment events; charts for payment volume and status distribution
-2.  **Vendors** — vendor list table, vendor details page, payment method info (ACH or card), mock bank verification status
-3.  **Invoices** — invoice list, mock invoice upload, invoice approval workflow, attach invoice to vendor
-4.  **Payments** — create payment, select vendor and invoice, choose payment method, schedule payment, payment status lifecycle: draft → scheduled → processing → settled → failed
-5.  **Transactions Feed** — event-style log similar to Stripe webhooks tracking payment lifecycle events
-6.  **Reconciliation Page** — table showing invoice amount vs payment amount, settlement batch grouping, highlight mismatches
-7. **Real-time Fraud & Risk Monitoring**: Flag suspicious payments dynamically.
+4.  **Dashboard** — summary cards for total payments, pending payments, completed payments, and failed payments; recent activity feed showing payment events; charts for payment volume and status distribution
+5.  **Vendors** — vendor list table, vendor details page, payment method info (ACH or card), mock bank verification status
+6.  **Invoices** — invoice list, mock invoice upload, invoice approval workflow, attach invoice to vendor
+7.  **Payments** — create payment, select vendor and invoice, choose payment method, schedule payment, payment status lifecycle: draft → scheduled → processing → settled → failed
+8.  **Transactions Feed** — event-style log similar to Stripe webhooks tracking payment lifecycle events
+9.  **Reconciliation Page** — table showing invoice amount vs payment amount, settlement batch grouping, highlight mismatches
+10. **Real-time Fraud & Risk Monitoring**: Flag suspicious payments dynamically.
 - **Rule-based Engine**: Evaluates volume spikes, high-risk countries, and frequent failures.
 - **Anomaly Detection**: Flags behavioral patterns like payment frequency vs. volume anomalies.
 - **Risk Dashboards**: Global and vendor-level visualizations (trends & velocity).
@@ -27,12 +27,11 @@ The application simulates a vendor payments platform using mock data and local A
   
   ![alt text](image.png)
   
-  $$ \text{Risk Score} = (\text{Failures} \times 2) + (\text{Fraud Alerts} \times 5) + (\text{High Value} \times 1) $$
-8.  **Dev Console** — mock developer API console for generating API keys, simulating payments, viewing request logs, and triggering mock webhooks
-9.  **Partner Portal** — simulator for onboarding external partners, monitoring their API usage, managing webhook connections, and rotating partner API keys
-10.  **System Events** — real-time event log and service telemetry dashboard with timeline and architecture visualizations
-11.  **Double-Entry Ledger** — core accounting system with strict double-entry invariants, transaction journal, and immutable audit trail
-12.  **Retry Queue** — automated backoff simulation tracking failed payments with customizable exponential retry intervals
+11.  **Dev Console** — mock developer API console for generating API keys, simulating payments, viewing request logs, and triggering mock webhooks
+12.  **Partner Portal** — simulator for onboarding external partners, monitoring their API usage, managing webhook connections, and rotating partner API keys
+13.  **System Events** — real-time event log and service telemetry dashboard with timeline and architecture visualizations
+14.  **Double-Entry Ledger** — core accounting system with strict double-entry invariants, transaction journal, and immutable audit trail
+15.  **Retry Queue** — automated backoff simulation tracking failed payments with customizable exponential retry intervals
 
 ### Design & Architecture
 
