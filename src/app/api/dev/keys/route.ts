@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getDb, mapDevApiKey } from '@/lib/db';
 import crypto from 'crypto';
@@ -78,3 +77,6 @@ function generateNewKey() {
         lastUsedAt: null,
     };
 }
+
+export const dynamic = 'force-dynamic';
+

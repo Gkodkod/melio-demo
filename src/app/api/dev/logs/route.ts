@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getDb, mapDevApiLog } from '@/lib/db';
 
@@ -18,3 +17,6 @@ export async function GET() {
         return NextResponse.json( { error: 'Failed to fetch API logs' }, { status: 500 } );
     }
 }
+
+export const dynamic = 'force-dynamic';
+

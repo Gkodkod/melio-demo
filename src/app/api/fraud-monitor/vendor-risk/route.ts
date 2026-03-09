@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
 
@@ -86,3 +85,6 @@ export async function GET() {
 
     return NextResponse.json( { vendors: result, riskHistory, velocityData } );
 }
+
+export const dynamic = 'force-dynamic';
+

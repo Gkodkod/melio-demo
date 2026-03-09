@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getDb, mapLedgerEntry } from '@/lib/db';
 
@@ -113,3 +112,6 @@ export async function POST( request: Request ) {
         return NextResponse.json( { error: error instanceof Error ? error.message : 'Internal server error' }, { status: 500 } );
     }
 }
+
+export const dynamic = 'force-dynamic';
+

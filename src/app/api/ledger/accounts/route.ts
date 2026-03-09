@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getDb, mapLedgerAccount } from '@/lib/db';
 
@@ -17,3 +16,6 @@ export async function GET() {
         return NextResponse.json( { error: 'Internal server error' }, { status: 500 } );
     }
 }
+
+export const dynamic = 'force-dynamic';
+

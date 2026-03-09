@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getDb, mapInvoice } from '@/lib/db';
 
@@ -11,3 +10,6 @@ export async function GET() {
     if ( error ) return NextResponse.json( { error: error.message }, { status: 500 } );
     return NextResponse.json( ( data ?? [] ).map( ( r ) => mapInvoice( r as Record<string, unknown> ) ) );
 }
+
+export const dynamic = 'force-dynamic';
+

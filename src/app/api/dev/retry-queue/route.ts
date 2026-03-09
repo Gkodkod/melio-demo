@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import { getDb, mapRetryQueueEntry } from '@/lib/db';
 import { SupabaseClient } from '@supabase/supabase-js';
@@ -85,3 +84,6 @@ export async function POST( request: Request ) {
         return NextResponse.json( { error: 'Action failed', details: error instanceof Error ? error.message : String( error ) }, { status: 500 } );
     }
 }
+
+export const dynamic = 'force-dynamic';
+
