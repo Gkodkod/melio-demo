@@ -17,6 +17,8 @@ import {
     Moon,
     Network,
     Radio,
+    BookOpen,
+    Clock,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -28,11 +30,13 @@ const navItems = [
     { label: 'Invoices', href: '/invoices', icon: FileText },
     { label: 'Payments', href: '/payments', icon: CreditCard },
     { label: 'Transactions', href: '/transactions', icon: Activity },
+    { label: 'Ledger', href: '/ledger', icon: BookOpen },
     { label: 'Reconciliation', href: '/reconciliation', icon: Scale },
     { label: 'Fraud Monitor', href: '/fraud-monitor', icon: ShieldAlert },
     { label: 'Dev Console', href: '/dev-console', icon: Terminal },
     { label: 'Partner Portal', href: '/partner-portal', icon: Network },
     { label: 'System Events', href: '/system-events', icon: Radio },
+    { label: 'Retry Queue', href: '/retry-queue', icon: Clock },
 ];
 
 export default function Sidebar() {
