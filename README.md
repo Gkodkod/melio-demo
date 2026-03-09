@@ -1,12 +1,12 @@
-# Melio — Vendor Payments Platform
+# Melio — SMB Vendor Payments Platform
 
-A modern fintech web application built with **Next.js 14**, **TypeScript**, **Tailwind CSS**, and **SQLite** that simulates a vendor payments platform similar to Melio or Bill.com.
+A modern fintech web application built with **React / Next.js 14**, **TypeScript**, **Tailwind CSS**, and **SQLite** that simulates a vendor payments platform similar to Melio or Bill.com.  It simulates these Accounts Payable/Receivable software for SMBs and Accountants
 
 ---
 
 ## Overview
 
-The application simulates a vendor payments platform using mock data and local API routes, demonstrating a realistic payments workflow and financial dashboard.
+The application simulates a vendor payments platform using mock data and local API routes, demonstrating a realistic payments workflow and financial dashboard, as though they were running in a real production environment on AWS.
 
 ### Core Features
 
@@ -19,19 +19,20 @@ The application simulates a vendor payments platform using mock data and local A
 4.  **Payments** — create payment, select vendor and invoice, choose payment method, schedule payment, payment status lifecycle: draft → scheduled → processing → settled → failed
 5.  **Transactions Feed** — event-style log similar to Stripe webhooks tracking payment lifecycle events
 6.  **Reconciliation Page** — table showing invoice amount vs payment amount, settlement batch grouping, highlight mismatches
-
-### 🛡️ Fraud Detection & Risk Monitoring
-- **Real-time Fraud Monitor**: Flag suspicious payments dynamically.
+7. **Real-time Fraud & Risk Monitoring**: Flag suspicious payments dynamically.
 - **Rule-based Engine**: Evaluates volume spikes, high-risk countries, and frequent failures.
-- **Vendor-Level Risk Model**: Scores vendors dynamically using the formula:
-  $$ \text{Risk Score} = (\text{Failures} \times 2) + (\text{Fraud Alerts} \times 5) + (\text{High Value} \times 1) $$
 - **Anomaly Detection**: Flags behavioral patterns like payment frequency vs. volume anomalies.
 - **Risk Dashboards**: Global and vendor-level visualizations (trends & velocity).
+- **Vendor-Level Risk Model**: Scores vendors dynamically using the formula:
+  
+  ![alt text](image.png)
+  
+  $$ \text{Risk Score} = (\text{Failures} \times 2) + (\text{Fraud Alerts} \times 5) + (\text{High Value} \times 1) $$
 8.  **Dev Console** — mock developer API console for generating API keys, simulating payments, viewing request logs, and triggering mock webhooks
 9.  **Partner Portal** — simulator for onboarding external partners, monitoring their API usage, managing webhook connections, and rotating partner API keys
-10. **System Events** — real-time event log and service telemetry dashboard with timeline and architecture visualizations
-11. **Double-Entry Ledger** — core accounting system with strict double-entry invariants, transaction journal, and immutable audit trail
-12. **Retry Queue** — automated backoff simulation tracking failed payments with customizable exponential retry intervals
+10.  **System Events** — real-time event log and service telemetry dashboard with timeline and architecture visualizations
+11.  **Double-Entry Ledger** — core accounting system with strict double-entry invariants, transaction journal, and immutable audit trail
+12.  **Retry Queue** — automated backoff simulation tracking failed payments with customizable exponential retry intervals
 
 ### Design & Architecture
 
