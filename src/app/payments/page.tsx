@@ -50,6 +50,7 @@ export default function PaymentsPage() {
         {
             key: 'payment',
             header: 'Payment',
+            sortValue: ( p ) => p.vendorName,
             render: ( p ) => (
                 <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500/20 to-pink-500/20 flex items-center justify-center text-violet-400">
@@ -70,6 +71,7 @@ export default function PaymentsPage() {
         {
             key: 'amount',
             header: 'Amount',
+            sortValue: ( p ) => p.amount,
             render: ( p ) => (
                 <span className="font-semibold text-white">{formatCurrency( p.amount )}</span>
             ),
@@ -77,6 +79,7 @@ export default function PaymentsPage() {
         {
             key: 'method',
             header: 'Method',
+            sortValue: ( p ) => p.paymentMethod,
             render: ( p ) => (
                 <span className="uppercase text-xs font-semibold tracking-wider text-slate-400">
                     {p.paymentMethod}
@@ -86,11 +89,13 @@ export default function PaymentsPage() {
         {
             key: 'status',
             header: 'Status',
+            sortValue: ( p ) => p.status,
             render: ( p ) => <StatusBadge status={p.status} />,
         },
         {
             key: 'scheduled',
             header: 'Scheduled',
+            sortValue: ( p ) => p.scheduledDate,
             render: ( p ) => <span className="text-slate-400">{formatDate( p.scheduledDate )}</span>,
         },
     ];

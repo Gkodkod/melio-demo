@@ -32,6 +32,7 @@ export default function InvoicesPage() {
         {
             key: 'invoice',
             header: 'Invoice',
+            sortValue: ( i ) => i.invoiceNumber,
             render: ( i ) => (
                 <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center text-blue-400">
@@ -47,11 +48,13 @@ export default function InvoicesPage() {
         {
             key: 'vendor',
             header: 'Vendor',
+            sortValue: ( i ) => i.vendorName,
             render: ( i ) => <span className="text-slate-300">{i.vendorName}</span>,
         },
         {
             key: 'amount',
             header: 'Amount',
+            sortValue: ( i ) => i.amount,
             render: ( i ) => (
                 <span className="font-semibold text-white">{formatCurrency( i.amount )}</span>
             ),
@@ -59,11 +62,13 @@ export default function InvoicesPage() {
         {
             key: 'status',
             header: 'Status',
+            sortValue: ( i ) => i.status,
             render: ( i ) => <StatusBadge status={i.status} />,
         },
         {
             key: 'due',
             header: 'Due Date',
+            sortValue: ( i ) => i.dueDate,
             render: ( i ) => <span className="text-slate-400">{formatDate( i.dueDate )}</span>,
         },
         {

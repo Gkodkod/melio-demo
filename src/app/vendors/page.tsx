@@ -27,6 +27,7 @@ export default function VendorsPage() {
         {
             key: 'name',
             header: 'Vendor',
+            sortValue: ( v ) => v.name,
             render: ( v ) => (
                 <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/20 flex items-center justify-center text-indigo-400">
@@ -42,6 +43,7 @@ export default function VendorsPage() {
         {
             key: 'method',
             header: 'Payment Method',
+            sortValue: ( v ) => v.paymentMethod,
             render: ( v ) => (
                 <span className="uppercase text-xs font-semibold tracking-wider text-slate-300">
                     {v.paymentMethod} •••• {v.accountLast4}
@@ -56,6 +58,7 @@ export default function VendorsPage() {
         {
             key: 'totalPaid',
             header: 'Total Paid',
+            sortValue: ( v ) => v.totalPaid,
             render: ( v ) => (
                 <span className="font-semibold text-white">{formatCurrency( v.totalPaid )}</span>
             ),
@@ -63,6 +66,7 @@ export default function VendorsPage() {
         {
             key: 'created',
             header: 'Added',
+            sortValue: ( v ) => v.createdAt,
             render: ( v ) => <span className="text-slate-400">{formatDate( v.createdAt )}</span>,
         },
     ];

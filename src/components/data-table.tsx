@@ -1,9 +1,15 @@
+'use client';
+
+import { useState, useMemo } from 'react';
+import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface DataTableColumn<T> {
     key: string;
     header: string;
     render: ( item: T ) => React.ReactNode;
+    /** If provided, this column is sortable. Return the raw value to sort by. */
+    sortValue?: ( item: T ) => string | number;
     className?: string;
 }
 
@@ -14,12 +20,46 @@ interface DataTableProps<T> {
     emptyMessage?: string;
 }
 
+type SortDir = 'asc' | 'desc';
+
 export default function DataTable<T>( {
     columns,
     data,
     onRowClick,
     emptyMessage = 'No data found.',
 }: DataTableProps<T> ) {
+    const [sortKey, setSortKey] = useState<string | null>( null );
+    const [sortDir, setSortDir] = useState<SortDir>( 'asc' );
+
+    const handleSort = ( col: DataTableColumn<T> ) => {
+        if ( !col.sortValue ) return;
+        if ( sortKey === col.key ) {
+            setSortDir( ( d ) => ( d === 'asc' ? 'desc' : 'asc' ) );
+        } else {
+            setSortKey( col.key );
+            setSortDir( 'asc' );
+        }
+    };
+
+    const sortedData = useMemo( () => {
+        if ( !sortKey ) return data;
+        const col = columns.find( ( c ) => c.key === sortKey );
+        if ( !col?.sortValue ) return data;
+        const accessor = col.sortValue;
+        return [...data].sort( ( a, b ) => {
+            const va = accessor( a );
+            const vb = accessor( b );
+            if ( typeof va === 'number' && typeof vb === 'number' ) {
+                return sortDir === 'asc' ? va - vb : vb - va;
+            }
+            const sa = String( va ).toLowerCase();
+            const sb = String( vb ).toLowerCase();
+            if ( sa < sb ) return sortDir === 'asc' ? -1 : 1;
+            if ( sa > sb ) return sortDir === 'asc' ? 1 : -1;
+            return 0;
+        } );
+    }, [data, sortKey, sortDir, columns] );
+
     if ( data.length === 0 ) {
         return (
             <div className="rounded-2xl border border-slate-800 bg-slate-900/50 p-12 text-center">
@@ -34,21 +74,41 @@ export default function DataTable<T>( {
                 <table className="w-full">
                     <thead>
                         <tr className="border-b border-slate-800">
-                            {columns.map( ( col ) => (
-                                <th
-                                    key={col.key}
-                                    className={cn(
-                                        'px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-400',
-                                        col.className
-                                    )}
-                                >
-                                    {col.header}
-                                </th>
-                            ) )}
+                            {columns.map( ( col ) => {
+                                const isSortable = !!col.sortValue;
+                                const isActive = sortKey === col.key;
+                                return (
+                                    <th
+                                        key={col.key}
+                                        onClick={() => handleSort( col )}
+                                        className={cn(
+                                            'px-6 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-400',
+                                            isSortable && 'cursor-pointer select-none hover:text-slate-200 transition-colors',
+                                            isActive && 'text-indigo-400',
+                                            col.className
+                                        )}
+                                    >
+                                        <span className="inline-flex items-center gap-1.5">
+                                            {col.header}
+                                            {isSortable && (
+                                                isActive ? (
+                                                    sortDir === 'asc' ? (
+                                                        <ChevronUp size={14} className="text-indigo-400" />
+                                                    ) : (
+                                                        <ChevronDown size={14} className="text-indigo-400" />
+                                                    )
+                                                ) : (
+                                                    <ChevronsUpDown size={14} className="opacity-30" />
+                                                )
+                                            )}
+                                        </span>
+                                    </th>
+                                );
+                            } )}
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-800/50">
-                        {data.map( ( item, idx ) => (
+                        {sortedData.map( ( item, idx ) => (
                             <tr
                                 key={idx}
                                 onClick={() => onRowClick?.( item )}
