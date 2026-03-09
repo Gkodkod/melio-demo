@@ -47,6 +47,15 @@ export interface Payment {
   processedDate?: string;
   settledDate?: string;
   failureReason?: string;
+  vendorCurrency?: string;
+  usdAmount?: number;
+  foreignAmount?: number;
+  fxRate?: number;
+  fxTimestamp?: string;
+  marketFxRate?: number;
+  fxSpread?: number;
+  fxFeeAmount?: number;
+  transferFeeAmount?: number;
   createdAt: string;
 }
 
@@ -60,6 +69,15 @@ export interface TransactionEvent {
     paymentMethod: PaymentMethod;
     status: PaymentStatus;
     failureReason?: string;
+    vendorCurrency?: string;
+    usdAmount?: number;
+    foreignAmount?: number;
+    fxRate?: number;
+    fxTimestamp?: string;
+    marketFxRate?: number;
+    fxSpread?: number;
+    fxFeeAmount?: number;
+    transferFeeAmount?: number;
   };
   timestamp: string;
 }

@@ -65,6 +65,11 @@ export function mapPayment( row: Record<string, unknown> ) {
     processedDate: row.processed_date,
     settledDate: row.settled_date,
     failureReason: row.failure_reason,
+    vendorCurrency: row.vendor_currency,
+    usdAmount: row.usd_amount,
+    foreignAmount: row.foreign_amount,
+    fxRate: row.fx_rate,
+    fxTimestamp: row.fx_timestamp,
     createdAt: row.created_at,
   };
 }
@@ -80,6 +85,11 @@ export function mapTransactionEvent( row: Record<string, unknown> ) {
       paymentMethod: row.payment_method,
       status: row.status,
       failureReason: row.failure_reason || undefined,
+      vendorCurrency: row.vendor_currency || undefined,
+      usdAmount: row.usd_amount || undefined,
+      foreignAmount: row.foreign_amount || undefined,
+      fxRate: row.fx_rate || undefined,
+      fxTimestamp: row.fx_timestamp || undefined,
     },
     timestamp: row.timestamp,
   };

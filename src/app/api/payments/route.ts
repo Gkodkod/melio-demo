@@ -15,7 +15,11 @@ export async function GET() {
 export async function POST( request: Request ) {
     try {
         const body = await request.json();
-        const { vendorId, invoiceId, amount, paymentMethod, scheduledDate } = body;
+        const {
+            vendorId, invoiceId, amount, paymentMethod, scheduledDate,
+            vendorCurrency, usdAmount, foreignAmount, fxRate, fxTimestamp,
+            marketFxRate, fxSpread, fxFeeAmount, transferFeeAmount
+        } = body;
 
         // Basic validation
         if ( !vendorId || !invoiceId || !amount || !paymentMethod || !scheduledDate ) {
@@ -47,6 +51,15 @@ export async function POST( request: Request ) {
             payment_method: paymentMethod,
             status: scheduledDate === today ? 'processing' : 'scheduled',
             scheduled_date: scheduledDate,
+            vendor_currency: vendorCurrency,
+            usd_amount: usdAmount,
+            foreign_amount: foreignAmount,
+            fx_rate: fxRate,
+            fx_timestamp: fxTimestamp,
+            market_fx_rate: marketFxRate,
+            fx_spread: fxSpread,
+            fx_fee_amount: fxFeeAmount,
+            transfer_fee_amount: transferFeeAmount,
             created_at: new Date().toISOString(),
         };
 
@@ -66,6 +79,11 @@ export async function POST( request: Request ) {
             amount: amount,
             payment_method: paymentMethod,
             status: newPayment.status,
+            vendor_currency: vendorCurrency,
+            usd_amount: usdAmount,
+            foreign_amount: foreignAmount,
+            fx_rate: fxRate,
+            fx_timestamp: fxTimestamp,
             timestamp: new Date().toISOString()
         };
         const { error: eventError } = await supabase.from( 'transaction_events' ).insert( newEvent );

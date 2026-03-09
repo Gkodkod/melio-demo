@@ -16,6 +16,7 @@ This project demonstrates core fintech platform concepts:
 • payment lifecycle orchestration
 • event-driven architecture
 • fraud monitoring
+• international payments (FX conversion & spread)
 • reconciliation systems
 • partner API integrations
 • idempotent APIs
@@ -33,19 +34,12 @@ This project demonstrates core fintech platform concepts:
 7.  **Payments** — create payment, select vendor and invoice, choose payment method, schedule payment, payment status lifecycle: draft → scheduled → processing → settled → failed
 8.  **Transactions Feed** — event-style log similar to Stripe webhooks tracking payment lifecycle events
 9.  **Reconciliation Page** — table showing invoice amount vs payment amount, settlement batch grouping, highlight mismatches
-10. **Real-time Fraud & Risk Monitoring**: Flag suspicious payments dynamically.
-- **Rule-based Engine**: Evaluates volume spikes, high-risk countries, and frequent failures.
-- **Anomaly Detection**: Flags behavioral patterns like payment frequency vs. volume anomalies.
-- **Risk Dashboards**: Global and vendor-level visualizations (trends & velocity).
-- **Vendor-Level Risk Model**: Scores vendors dynamically using the formula:
-  
-  ![alt text](image.png)
-  
-11.  **Dev Console** — mock developer API console for generating API keys, simulating payments, viewing request logs, and triggering mock webhooks
-12.  **Partner Portal** — simulator for onboarding external partners, monitoring their API usage, managing webhook connections, and rotating partner API keys
-13.  **System Events** — real-time event log and service telemetry dashboard with timeline and architecture visualizations
-14.  **Double-Entry Ledger** — core accounting system with strict double-entry invariants, transaction journal, and immutable audit trail
-15.  **Retry Queue** — automated backoff simulation tracking failed payments with customizable exponential retry intervals
+12.  **Dev Console** — mock developer API console for generating API keys, simulating payments, viewing request logs, and triggering mock webhooks
+13.  **Partner Portal** — simulator for onboarding external partners, monitoring their API usage, managing webhook connections, and rotating partner API keys
+14.  **System Events** — real-time event log and service telemetry dashboard with timeline and architecture visualizations
+15.  **Double-Entry Ledger** — core accounting system with strict double-entry invariants, transaction journal, and immutable audit trail
+16.  **Retry Queue** — automated backoff simulation tracking failed payments with customizable exponential retry intervals
+17.  **International Payments & FX Spread** — real-time foreign exchange rate conversion with cached Supabase lookup, simulating revenue generation through implicit FX margin markups and transfer fees.
 
 ### Design & Architecture
 
@@ -115,10 +109,12 @@ npm run seed
 
 ### 4. Payments (`/payments`)
 
--   **Create Payment** modal: select vendor, invoice, payment method (ACH/Card), schedule date
+-   **Create Payment** modal: select vendor, invoice, payment method (ACH/Card), schedule date, and **Currency** (USD, EUR, GBP, etc.)
+-   **Payment Preview**: Transparent foreign exchange flow showing live market rates vs platform rates, FX margin spread (e.g. 0.6%), transfer fees ($20), and a dynamic 30-second **Rate Lock** countdown timer before execution.
 -   **Payment detail** modal with advanced **Payment Lifecycle Timeline** component:
     -   Vertical layout with status icons, timestamps, and active states (Draft → Scheduled → Processing → Settled)
     -   Expandable event details revealing simulated JSON API payloads for each step
+    -   Explicit breakdown showing both the foreign amount the vendor receives and the USD debited, plus the applied locked FX rate and flat fees.
 -   Failed payments show error reason with red highlight
 
 ### 5. Transactions (`/transactions`)
