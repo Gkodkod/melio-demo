@@ -25,7 +25,14 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/components/theme-provider';
 
-const navItems = [
+type NavItem = {
+    label: string;
+    href?: string;
+    icon?: React.ElementType;
+    separator?: boolean;
+};
+
+const navItems: NavItem[] = [
     { label: 'Dashboard', href: '/', icon: LayoutDashboard },
     { label: 'Vendors', href: '/vendors', icon: Users },
     { label: 'Invoices', href: '/invoices', icon: FileText },
@@ -33,6 +40,7 @@ const navItems = [
     { label: 'Transactions', href: '/transactions', icon: Activity },
     { label: 'Ledger', href: '/ledger', icon: BookOpen },
     { label: 'Reconciliation', href: '/reconciliation', icon: Scale },
+    { label: 'ADMINISTRATION', separator: true },
     { label: 'Fraud Monitor', href: '/fraud-monitor', icon: ShieldAlert },
     { label: 'Vendor Risk', href: '/vendor-risk', icon: Target },
     { label: 'Dev Console', href: '/dev-console', icon: Terminal },
@@ -104,32 +112,48 @@ export default function Sidebar() {
 
                 {/* Nav */}
                 <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-                    {navItems.map( ( { label, href, icon: Icon } ) => (
-                        <Link
-                            key={href}
-                            href={href}
-                            onClick={() => setMobileOpen( false )}
-                            className={cn(
-                                'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
-                                isActive( href )
-                                    ? isDark
-                                        ? 'bg-indigo-600/20 text-indigo-300 shadow-sm shadow-indigo-500/10'
-                                        : 'bg-indigo-50 text-indigo-600 shadow-sm shadow-indigo-500/5'
-                                    : isDark
-                                        ? 'text-slate-400 hover:text-white hover:bg-slate-800'
-                                        : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
-                            )}
-                        >
-                            <Icon size={18} />
-                            {label}
-                            {isActive( href ) && (
-                                <div className={cn(
-                                    'ml-auto w-1.5 h-1.5 rounded-full',
-                                    isDark ? 'bg-indigo-400' : 'bg-indigo-500'
-                                )} />
-                            )}
-                        </Link>
-                    ) )}
+                    {navItems.map( ( item, index ) => {
+                        if ( item.separator ) {
+                            return (
+                                <div key={`sep-${index}`} className={cn(
+                                    "px-3 pt-4 pb-2 text-xs font-bold tracking-wider uppercase",
+                                    isDark ? "text-slate-500" : "text-slate-400"
+                                )}>
+                                    {item.label}
+                                </div>
+                            );
+                        }
+
+                        const { label, href, icon: Icon } = item;
+                        const itemHref = href as string;
+
+                        return (
+                            <Link
+                                key={itemHref}
+                                href={itemHref}
+                                onClick={() => setMobileOpen( false )}
+                                className={cn(
+                                    'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200',
+                                    isActive( itemHref )
+                                        ? isDark
+                                            ? 'bg-indigo-600/20 text-indigo-300 shadow-sm shadow-indigo-500/10'
+                                            : 'bg-indigo-50 text-indigo-600 shadow-sm shadow-indigo-500/5'
+                                        : isDark
+                                            ? 'text-slate-400 hover:text-white hover:bg-slate-800'
+                                            : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
+                                )}
+                            >
+                                {Icon && <Icon size={18} />}
+                                {label}
+                                {isActive( itemHref ) && (
+                                    <div className={cn(
+                                        'ml-auto w-1.5 h-1.5 rounded-full',
+                                        isDark ? 'bg-indigo-400' : 'bg-indigo-500'
+                                    )} />
+                                )}
+                            </Link>
+                        );
+                    } )}
                 </nav>
 
                 {/* Theme Toggle + Footer */}
