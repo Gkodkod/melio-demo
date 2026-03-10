@@ -13,15 +13,15 @@ The application simulates a vendor payments platform using mock data and local A
 
 This project demonstrates core fintech platform concepts:
 
-• payment lifecycle orchestration
-• event-driven architecture
-• fraud monitoring
-• international payments (FX conversion & spread)
-• reconciliation systems
-• partner API integrations
-• idempotent APIs
-• double-entry ledger accounting
-• observability and operational metrics
+- payment lifecycle orchestration
+- event-driven architecture
+- fraud monitoring
+- international payments (FX conversion & spread)
+- reconciliation systems
+- partner API integrations
+- idempotent APIs
+- double-entry ledger accounting
+- observability and operational metrics
 
 ### Core Features
 
