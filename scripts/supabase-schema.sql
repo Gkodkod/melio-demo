@@ -18,11 +18,24 @@ DROP TABLE IF EXISTS dev_api_keys CASCADE;
 DROP TABLE IF EXISTS fraud_alerts CASCADE;
 DROP TABLE IF EXISTS reconciliation_records CASCADE;
 DROP TABLE IF EXISTS transaction_events CASCADE;
+DROP TABLE IF EXISTS fx_rates CASCADE;
 DROP TABLE IF EXISTS payments CASCADE;
 DROP TABLE IF EXISTS invoices CASCADE;
 DROP TABLE IF EXISTS vendors CASCADE;
 
 -- ─── Core tables ──────────────────────────────────────────────────────
+
+CREATE TABLE fx_rates (
+    id TEXT PRIMARY KEY,
+    base_currency TEXT NOT NULL,
+    target_currency TEXT NOT NULL,
+    rate NUMERIC NOT NULL,
+    rate_date TEXT NOT NULL,
+    source TEXT,
+    created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS fx_rates_lookup_idx ON fx_rates (base_currency, target_currency, rate_date);
 
 CREATE TABLE vendors (
   id                     TEXT PRIMARY KEY,
@@ -65,6 +78,15 @@ CREATE TABLE payments (
   processed_date  TEXT,
   settled_date    TEXT,
   failure_reason  TEXT,
+  vendor_currency TEXT,
+  usd_amount      NUMERIC,
+  foreign_amount  NUMERIC,
+  fx_rate         NUMERIC,
+  fx_timestamp    TEXT,
+  market_fx_rate  NUMERIC,
+  fx_spread       NUMERIC,
+  fx_fee_amount   NUMERIC,
+  transfer_fee_amount NUMERIC,
   created_at      TEXT NOT NULL
 );
 
@@ -77,6 +99,11 @@ CREATE TABLE transaction_events (
   payment_method TEXT NOT NULL,
   status         TEXT NOT NULL,
   failure_reason TEXT,
+  vendor_currency TEXT,
+  usd_amount      NUMERIC,
+  foreign_amount  NUMERIC,
+  fx_rate         NUMERIC,
+  fx_timestamp    TEXT,
   timestamp      TEXT NOT NULL
 );
 
@@ -223,6 +250,7 @@ CREATE TABLE retry_queue (
 -- ─── Seed ledger accounts ─────────────────────────────────────────────
 
 INSERT INTO ledger_accounts (id, name, type, balance, created_at) VALUES
-  ('acc_buyer',   'buyer_wallet',    'asset',    50000.00, NOW()::TEXT),
-  ('acc_vendor',  'vendor_wallet',   'liability', 0.00,    NOW()::TEXT),
-  ('acc_capital', 'external_capital','equity',  -50000.00, NOW()::TEXT);
+  ('acc_buyer',   'buyer_wallet',    'asset',    0.00, NOW()::TEXT),
+  ('acc_vendor',  'vendor_payable',  'liability', 0.00, NOW()::TEXT),
+  ('acc_capital', 'external_capital','equity',  0.00, NOW()::TEXT),
+  ('acc_expense', 'operating_expenses', 'expense', 0.00, NOW()::TEXT);

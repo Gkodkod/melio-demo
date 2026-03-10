@@ -22,7 +22,7 @@ export default async function PartnerPortalPage() {
         <div className="space-y-6">
             <PageHeader
                 title="Partner Integrations"
-                description="Simulator for onboarding external partners, monitoring their API usage and managing connections."
+                description="Simulator for onboarding external partners, monitoring their API usage and managing connections. Click on a partner to view their details."
             />
 
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">

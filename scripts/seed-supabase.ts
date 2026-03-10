@@ -264,33 +264,112 @@ for ( let i = 29; i >= 0; i-- ) {
 const ledgerEntries: Record<string, unknown>[] = [];
 let ledgerCounter = 1;
 
-for ( const payment of payments as { id: string; amount: number; vendor_name: string; created_at: string; status: string }[] ) {
-    if ( payment.status !== 'settled' && payment.status !== 'processing' ) continue;
+const accountBalances: Record<string, number> = {
+    'acc_buyer': 0,
+    'acc_vendor': 0,
+    'acc_capital': 0,
+    'acc_expense': 0,
+};
 
-    const transactionId = `txn_${payment.id}`;
+// 1. Initial Capital Injection
+const capitalAmount = 1000000;
+const capitalDate = isoDate( new Date( '2025-01-01' ) );
+ledgerEntries.push( {
+    id: `ent-${pad( ledgerCounter++, 4 )}`,
+    transaction_id: 'txn_capital_funding',
+    account_id: 'acc_buyer',
+    account_name: 'buyer_wallet',
+    debit: capitalAmount,
+    credit: null,
+    description: 'Initial external capital funding',
+    created_at: capitalDate,
+} );
+accountBalances['acc_buyer'] += capitalAmount;
 
-    // Debit buyer_wallet (asset), Credit vendor_wallet (liability)
+ledgerEntries.push( {
+    id: `ent-${pad( ledgerCounter++, 4 )}`,
+    transaction_id: 'txn_capital_funding',
+    account_id: 'acc_capital',
+    account_name: 'external_capital',
+    debit: null,
+    credit: capitalAmount,
+    description: 'Initial external capital funding',
+    created_at: capitalDate,
+} );
+accountBalances['acc_capital'] += capitalAmount; // Equity increases with credit
+
+// 2. Invoice Accruals
+for ( const invoice of invoices as { id: string; amount: number; vendor_name: string; created_at: string; status: string }[] ) {
+    if ( invoice.status === 'rejected' || invoice.status === 'pending' ) continue;
+
+    const transactionId = `txn_inv_${invoice.id}`;
+
+    // Debit Operating Expenses
     ledgerEntries.push( {
         id: `ent-${pad( ledgerCounter++, 4 )}`,
         transaction_id: transactionId,
-        account_id: 'acc_buyer',
-        account_name: 'buyer_wallet',
+        account_id: 'acc_expense',
+        account_name: 'operating_expenses',
+        debit: invoice.amount,
+        credit: null,
+        description: `Invoice accrued from ${invoice.vendor_name}`,
+        created_at: invoice.created_at,
+    } );
+    accountBalances['acc_expense'] += invoice.amount; // Expense increases with debit
+
+    // Credit Vendor Payable
+    ledgerEntries.push( {
+        id: `ent-${pad( ledgerCounter++, 4 )}`,
+        transaction_id: transactionId,
+        account_id: 'acc_vendor',
+        account_name: 'vendor_payable',
+        debit: null,
+        credit: invoice.amount,
+        description: `Invoice accrued from ${invoice.vendor_name}`,
+        created_at: invoice.created_at,
+    } );
+    accountBalances['acc_vendor'] += invoice.amount; // Liability increases with credit
+}
+
+// 3. Payments
+for ( const payment of payments as { id: string; amount: number; vendor_name: string; created_at: string; status: string }[] ) {
+    if ( payment.status !== 'settled' && payment.status !== 'processing' ) continue;
+
+    const transactionId = `txn_pay_${payment.id}`;
+
+    // Debit Vendor Payable (relieve liability)
+    ledgerEntries.push( {
+        id: `ent-${pad( ledgerCounter++, 4 )}`,
+        transaction_id: transactionId,
+        account_id: 'acc_vendor',
+        account_name: 'vendor_payable',
         debit: payment.amount,
         credit: null,
         description: `Payment to ${payment.vendor_name}`,
         created_at: payment.created_at,
     } );
+    accountBalances['acc_vendor'] -= payment.amount;
+
+    // Credit Buyer Wallet (reduce asset)
     ledgerEntries.push( {
         id: `ent-${pad( ledgerCounter++, 4 )}`,
         transaction_id: transactionId,
-        account_id: 'acc_vendor',
-        account_name: 'vendor_wallet',
+        account_id: 'acc_buyer',
+        account_name: 'buyer_wallet',
         debit: null,
         credit: payment.amount,
         description: `Payment to ${payment.vendor_name}`,
         created_at: payment.created_at,
     } );
+    accountBalances['acc_buyer'] -= payment.amount;
 }
+
+const ledgerAccounts = [
+    { id: 'acc_buyer', name: 'buyer_wallet', type: 'asset', balance: accountBalances['acc_buyer'], created_at: capitalDate },
+    { id: 'acc_vendor', name: 'vendor_payable', type: 'liability', balance: accountBalances['acc_vendor'], created_at: capitalDate },
+    { id: 'acc_capital', name: 'external_capital', type: 'equity', balance: accountBalances['acc_capital'], created_at: capitalDate },
+    { id: 'acc_expense', name: 'operating_expenses', type: 'expense', balance: accountBalances['acc_expense'], created_at: capitalDate }
+];
 
 // ─── Generate Dev API Logs ─────────────────────────────────────────
 
@@ -316,10 +395,10 @@ for ( let i = 0; i < 15; i++ ) {
 
 // ─── Insert into Supabase ──────────────────────────────────────────
 
-async function upsertBatch( table: string, rows: Record<string, unknown>[], batchSize = 200 ) {
+async function upsertBatch( table: string, rows: Record<string, unknown>[], batchSize = 200, onConflict = 'id' ) {
     for ( let i = 0; i < rows.length; i += batchSize ) {
         const batch = rows.slice( i, i + batchSize );
-        const { error } = await supabase.from( table ).upsert( batch );
+        const { error } = await supabase.from( table ).upsert( batch, { onConflict } );
         if ( error ) { console.error( `Error inserting into ${table}:`, error ); throw error; }
     }
 }
@@ -348,8 +427,20 @@ async function main() {
     await upsertBatch( 'partners', partners );
     await upsertBatch( 'partner_api_keys', apiKeys );
     await upsertBatch( 'partner_webhook_subscriptions', webhookSubs );
-    await upsertBatch( 'partner_api_metrics', apiMetrics );
     console.log( `✅ ${partners.length} partners (+ keys, webhooks, metrics)` );
+
+    // Clear ledger tables for clean start
+    const { error: delEntErr } = await supabase.from( 'ledger_entries' ).delete().gte( 'created_at', '2000-01-01' );
+    const { error: delAccErr } = await supabase.from( 'ledger_accounts' ).delete().gte( 'created_at', '2000-01-01' );
+
+    if ( delEntErr ) console.error( 'Error clearing ledger entries:', delEntErr );
+    if ( delAccErr ) console.error( 'Error clearing ledger accounts:', delAccErr );
+
+    console.log( '🧹 Cleared old ledger data' );
+
+    await upsertBatch( 'ledger_accounts', ledgerAccounts );
+    console.log( `✅ ${ledgerAccounts.length} ledger accounts updated` );
+    console.table( ledgerAccounts.map( a => ( { id: a.id, name: a.name, balance: a.balance } ) ) );
 
     await upsertBatch( 'ledger_entries', ledgerEntries );
     console.log( `✅ ${ledgerEntries.length} ledger entries` );
