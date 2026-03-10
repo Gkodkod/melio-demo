@@ -2,7 +2,7 @@
 
 A modern fintech web application built with **React / Next.js 14**, **TypeScript**, **Tailwind CSS**, and **Supabase PostgresDB**. It simulates a vendor payments platform similar to Melio or Bill.com, intended to be deployed on **Vercel**. It simulates these Accounts Payable/Receivable software for SMBs and Accountants
 
-LIVE DEMO: [https://melio-demo-three.vercel.app/](https://melio-demo-three.vercel.app/)
+LIVE DEMO: [https://melio-demo.vercel.app/](https://melio-demo.vercel.app/)
 ---
 
 ## Overview
