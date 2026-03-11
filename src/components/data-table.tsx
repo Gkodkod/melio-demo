@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -21,6 +21,43 @@ interface DataTableProps<T> {
 }
 
 type SortDir = 'asc' | 'desc';
+
+const DataTableRow = memo( function DataTableRow( {
+    item,
+    columns,
+    onRowClick,
+}: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    item: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    columns: DataTableColumn<any>[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onRowClick?: ( item: any ) => void;
+} ) {
+    return (
+        <tr
+            onClick={() => onRowClick?.( item )}
+            className={cn(
+                'transition-colors duration-150',
+                onRowClick
+                    ? 'cursor-pointer hover:bg-slate-800/50'
+                    : 'hover:bg-slate-800/30'
+            )}
+        >
+            {columns.map( ( col ) => (
+                <td
+                    key={col.key}
+                    className={cn(
+                        'whitespace-nowrap px-6 py-4 text-sm text-slate-300',
+                        col.className
+                    )}
+                >
+                    {col.render( item )}
+                </td>
+            ) )}
+        </tr>
+    );
+} );
 
 export default function DataTable<T>( {
     columns,
@@ -109,28 +146,12 @@ export default function DataTable<T>( {
                     </thead>
                     <tbody className="divide-y divide-slate-800/50">
                         {sortedData.map( ( item, idx ) => (
-                            <tr
-                                key={idx}
-                                onClick={() => onRowClick?.( item )}
-                                className={cn(
-                                    'transition-colors duration-150',
-                                    onRowClick
-                                        ? 'cursor-pointer hover:bg-slate-800/50'
-                                        : 'hover:bg-slate-800/30'
-                                )}
-                            >
-                                {columns.map( ( col ) => (
-                                    <td
-                                        key={col.key}
-                                        className={cn(
-                                            'whitespace-nowrap px-6 py-4 text-sm text-slate-300',
-                                            col.className
-                                        )}
-                                    >
-                                        {col.render( item )}
-                                    </td>
-                                ) )}
-                            </tr>
+                            <DataTableRow 
+                                key={idx} 
+                                item={item} 
+                                columns={columns} 
+                                onRowClick={onRowClick} 
+                            />
                         ) )}
                     </tbody>
                 </table>
