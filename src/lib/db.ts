@@ -236,6 +236,27 @@ export function mapLedgerEntry( row: Record<string, unknown> ) {
   };
 }
 
+// ─── Ledger Types ────────────────────────────────────────────────────
+
+export interface LedgerAccount {
+  id: string;
+  name: string;
+  type: 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
+  balance: number;
+  createdAt: string;
+}
+
+export interface LedgerEntry {
+  id: string;
+  transactionId: string;
+  accountId: string;
+  accountName: string;
+  debit: number | null;
+  credit: number | null;
+  description: string;
+  createdAt: string;
+}
+
 // ─── Retry Queue Mappers ───────────────────────────────────────────
 
 export function mapRetryQueueEntry( row: Record<string, unknown> ) {

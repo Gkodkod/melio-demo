@@ -1,6 +1,6 @@
 'use client';
 
-import { Upload, XCircle, CheckCircle, FileText } from 'lucide-react';
+import { Upload, XCircle, CheckCircle } from 'lucide-react';
 import { Invoice } from '@/lib/types';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import InvoicePdfViewer from '@/components/invoice-pdf-viewer';

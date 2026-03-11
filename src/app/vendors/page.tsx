@@ -9,7 +9,6 @@ import { Plus } from 'lucide-react';
 import VendorsTable from '@/components/vendors/vendors-table';
 import PageHeader from '@/components/page-header';
 import SearchInput from '@/components/search-input';
-import type { Vendor } from '@/lib/types';
 
 interface VendorsPageProps {
     searchParams: Promise<{ q?: string }>;

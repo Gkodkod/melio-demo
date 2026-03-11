@@ -1,4 +1,4 @@
-import { getDb, mapVendor, mapInvoice, mapPayment, mapTransactionEvent, mapFraudAlert } from './db';
+import { getDb, mapVendor, mapInvoice, mapPayment, mapTransactionEvent, mapFraudAlert, mapLedgerAccount, mapLedgerEntry, LedgerAccount, LedgerEntry } from './db';
 import { Vendor, Invoice, Payment, TransactionEvent, DashboardSummary, FraudAlert, FraudDashboardSummary, VendorRiskSummary } from './types';
 
 export async function getVendors(): Promise<Vendor[]> {
@@ -279,4 +279,25 @@ export async function getVendorRiskSummary(): Promise<VendorRiskSummary> {
     const velocityData = topRisky.map( v => ( { name: v.name, volume: v.totalVolume, count: v.paymentCount } ) );
 
     return { vendors: result, riskHistory, velocityData };
+}
+
+export async function getLedgerAccounts(): Promise<LedgerAccount[]> {
+    const supabase = getDb();
+    const { data, error } = await supabase
+        .from( 'ledger_accounts' )
+        .select( '*' )
+        .order( 'name', { ascending: true } );
+    if ( error ) throw new Error( error.message );
+    return ( data ?? [] ).map( row => mapLedgerAccount( row as Record<string, unknown> ) ) as LedgerAccount[];
+}
+
+export async function getLedgerEntries(): Promise<LedgerEntry[]> {
+    const supabase = getDb();
+    const { data, error } = await supabase
+        .from( 'ledger_entries' )
+        .select( '*' )
+        .order( 'created_at', { ascending: false } )
+        .limit( 500 );
+    if ( error ) throw new Error( error.message );
+    return ( data ?? [] ).map( row => mapLedgerEntry( row as Record<string, unknown> ) ) as LedgerEntry[];
 }

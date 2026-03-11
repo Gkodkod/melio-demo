@@ -27,8 +27,11 @@ const DataTableRow = memo( function DataTableRow( {
     columns,
     onRowClick,
 }: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     item: any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     columns: DataTableColumn<any>[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onRowClick?: ( item: any ) => void;
 } ) {
     return (

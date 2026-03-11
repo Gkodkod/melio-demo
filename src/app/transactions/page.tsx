@@ -11,6 +11,7 @@ import { formatCurrency, formatDateTime } from '@/lib/utils';
 import type { TransactionEventType } from '@/lib/types';
 import { Metadata } from 'next';
 import { getTransactionEvents } from '@/lib/data';
+import { LucideIcon } from 'lucide-react';
 
 export const metadata: Metadata = {
     title: 'Transactions | Melio',
@@ -18,7 +19,7 @@ export const metadata: Metadata = {
 };
 import TransactionTypeFilter from '@/components/transactions/transaction-type-filter';
 
-const eventTypeConfig: Record<TransactionEventType, { icon: any; color: string; bg: string; label: string }> = {
+const eventTypeConfig: Record<TransactionEventType, { icon: LucideIcon; color: string; bg: string; label: string }> = {
     'payment.created': {
         icon: ArrowUpRight,
         color: 'text-blue-400',

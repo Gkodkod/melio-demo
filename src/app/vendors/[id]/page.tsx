@@ -13,7 +13,6 @@ import {
 import StatusBadge from '@/components/status-badge';
 import { VendorPaymentsTable, VendorInvoicesTable } from '@/components/vendors/vendor-detail-tables';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import type { Vendor } from '@/lib/types';
 import { notFound } from 'next/navigation';
 
 interface VendorDetailPageProps {
