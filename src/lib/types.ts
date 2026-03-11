@@ -132,6 +132,28 @@ export interface FraudDashboardSummary {
   ruleStats: { rule: string; triggerCount: number }[];
 }
 
+export interface VendorRiskData {
+  id: string;
+  name: string;
+  totalVolume: number;
+  paymentCount: number;
+  metrics: {
+    paymentFailures: number;
+    highValueCount: number;
+    fraudAlerts: number;
+  };
+  score: number;
+  riskLevel: RiskLevel;
+  anomalies: string[];
+  vendorAge: string;
+}
+
+export interface VendorRiskSummary {
+  vendors: VendorRiskData[];
+  riskHistory: { date: string; avgScore: number }[];
+  velocityData: { name: string; volume: number; count: number }[];
+}
+
 // ─── Partner Portal Types ──────────────────────────────────────────
 
 export type PartnerStatus = 'active' | 'inactive' | 'suspended';
