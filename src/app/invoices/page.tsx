@@ -1,4 +1,10 @@
+import { Metadata } from 'next';
 import { getInvoices } from '@/lib/data';
+
+export const metadata: Metadata = {
+    title: 'Invoices | Melio',
+    description: 'Manage and pay your vendor invoices.',
+};
 import SearchInput from '@/components/search-input';
 import StatusFilter from '@/components/invoices/status-filter';
 import InvoicesView from '@/components/invoices/invoices-view';

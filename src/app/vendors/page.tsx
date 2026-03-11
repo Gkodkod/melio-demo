@@ -1,4 +1,10 @@
+import { Metadata } from 'next';
 import { getVendors } from '@/lib/data';
+
+export const metadata: Metadata = {
+    title: 'Vendors | Melio',
+    description: 'Manage your vendor relationships and payment methods.',
+};
 import { Plus } from 'lucide-react';
 import VendorsTable from '@/components/vendors/vendors-table';
 import PageHeader from '@/components/page-header';

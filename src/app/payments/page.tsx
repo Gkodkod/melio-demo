@@ -3,6 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import Image from 'next/image';
 import {
     CreditCard,
     Plus,
@@ -354,10 +355,12 @@ export default function PaymentsPage() {
                                                     className="w-full flex items-center justify-between px-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 hover:bg-slate-700/50 transition-colors"
                                                 >
                                                     <div className="flex items-center gap-2">
-                                                        <img
+                                                        <Image
                                                             src={`https://flagcdn.com/w20/${supportedCurrencies.find( c => c.code === createForm.currency )?.flag}.png`}
                                                             alt={createForm.currency}
-                                                            className="w-5 h-auto rounded-[2px]"
+                                                            width={20}
+                                                            height={15}
+                                                            className="rounded-[2px]"
                                                         />
                                                         <span>{createForm.currency}</span>
                                                     </div>
@@ -376,10 +379,12 @@ export default function PaymentsPage() {
                                                                 }}
                                                                 className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-indigo-500/10 hover:text-indigo-400 transition-colors ${createForm.currency === c.code ? 'bg-indigo-500/10 text-indigo-400' : 'text-slate-300'}`}
                                                             >
-                                                                <img
+                                                                <Image
                                                                     src={`https://flagcdn.com/w20/${c.flag}.png`}
                                                                     alt={c.code}
-                                                                    className="w-5 h-auto rounded-[2px]"
+                                                                    width={20}
+                                                                    height={15}
+                                                                    className="rounded-[2px]"
                                                                 />
                                                                 {c.code}
                                                             </button>

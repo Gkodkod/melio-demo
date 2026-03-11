@@ -78,12 +78,21 @@ const fraudStatuses = ['pending', 'pending', 'investigating', 'cleared', 'confir
 
 // ─── Generate data ─────────────────────────────────────────────────
 
-const vendors = companyNames.map( ( name, i ) => {
+// Scale up vendors
+const extraVendors = Array.from( { length: 20 }, ( _, i ) => ({
+    name: `Vendor ${i + 31} Corp`,
+    domain: `vendor${i + 31}.com`
+}));
+
+const vendors = [
+    ...companyNames.map( ( name, i ) => ({ name, domain: emailDomains[i] })),
+    ...extraVendors
+].map( ( v, i ) => {
     const method = Math.random() > 0.3 ? 'ach' : 'card';
     const verified = Math.random();
     return {
         id: `v-${pad( i + 1, 3 )}`,
-        name, email: `billing@${emailDomains[i]}`,
+        name: v.name, email: `billing@${v.domain}`,
         phone: `(${randomBetween( 200, 999 ).toFixed( 0 )}) 555-${pad( Math.floor( Math.random() * 10000 ), 4 )}`,
         address: `${Math.floor( Math.random() * 2000 ) + 100} Main St, ${randomPick( cities )}`,
         payment_method: method,
@@ -100,11 +109,13 @@ const invoices: Record<string, unknown>[] = [];
 let invCounter = 1;
 const invoicePrefixes = ['INV', 'CH', 'DL', 'FOC', 'GL', 'PCD', 'SIS', 'TN', 'APX', 'BW'];
 for ( const vendor of vendors ) {
-    const count = Math.floor( Math.random() * 4 ) + 2;
+    // Generate 10-20 invoices per vendor for more data
+    const count = Math.floor( Math.random() * 10 ) + 10;
     for ( let j = 0; j < count; j++ ) {
         const prefix = randomPick( invoicePrefixes );
         const amount = randomBetween( 500, 35000 );
-        const createdDate = addDays( new Date( '2025-06-01' ), Math.floor( Math.random() * 250 ) );
+        // More recent invoices to ensure they fall within the last 30-90 days
+        const createdDate = addDays( new Date(), -Math.floor( Math.random() * 120 ) );
         const status = randomPick( ['pending', 'approved', 'approved', 'approved', 'paid', 'rejected'] );
         invoices.push( {
             id: `inv-${pad( invCounter, 3 )}`,
@@ -141,7 +152,7 @@ for ( const invoice of invoices ) {
         processed_date: processedDate ? isoDate( processedDate ) : null,
         settled_date: settledDate ? isoDate( settledDate ) : null,
         failure_reason: status === 'failed' ? randomPick( failureReasons ) : null,
-        created_at: isoDate( addDays( createdDate, -1 ) ),
+        created_at: isoDate( addDays( createdDate, 1 ) ),
     } );
     payCounter++;
 }
@@ -199,7 +210,10 @@ for ( const [dateKey, batchPayments] of Object.entries( batchGroups ) ) {
 const fraudAlerts: Record<string, unknown>[] = [];
 let fraudCounter = 1;
 const shuffled = [...payments as { id: string; vendor_id: string; amount: number; status: string; created_at: string }[]].sort( () => Math.random() - 0.5 );
-const flaggedCount = Math.min( Math.floor( payments.length * 0.4 ), 55 );
+
+// Increase flagged count to 80% to show more data in charts
+const flaggedCount = Math.floor( payments.length * 0.8 ); 
+
 for ( let i = 0; i < flaggedCount; i++ ) {
     const payment = shuffled[i];
     const vendor = vendors.find( v => v.id === payment.vendor_id )!;
@@ -219,7 +233,12 @@ for ( let i = 0; i < flaggedCount; i++ ) {
     const baseScore = triggered.length * 20 + Math.floor( Math.random() * 25 );
     const riskScore = Math.min( 100, Math.max( 10, baseScore ) );
     const riskLevel = riskScore >= 60 ? 'high' : riskScore >= 30 ? 'medium' : 'low';
-    const flaggedAt = addDays( new Date( '2026-03-08' ), -Math.floor( Math.random() * 90 ) );
+    
+    // Concentrate 70% of alerts in the last 30 days for a dense chart
+    const isRecent = Math.random() > 0.3;
+    const daysBack = isRecent ? Math.floor( Math.random() * 30 ) : Math.floor( Math.random() * 90 );
+    const flaggedAt = addDays( new Date(), -daysBack );
+    
     fraudAlerts.push( {
         id: `fa-${pad( fraudCounter++, 3 )}`, payment_id: payment.id, vendor_id: vendor.id,
         vendor_name: vendor.name, amount: payment.amount, risk_score: riskScore, risk_level: riskLevel,
