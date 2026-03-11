@@ -1,7 +1,5 @@
-'use client';
-
-import { useQuery } from '@tanstack/react-query';
-import { useParams, useRouter } from 'next/navigation';
+import { getVendorById, getPaymentsByVendorId, getInvoicesByVendorId } from '@/lib/data';
+import Link from 'next/link';
 import {
     ArrowLeft,
     Building2,
@@ -13,93 +11,38 @@ import {
     Shield,
 } from 'lucide-react';
 import StatusBadge from '@/components/status-badge';
-import DataTable, { DataTableColumn } from '@/components/data-table';
+import { VendorPaymentsTable, VendorInvoicesTable } from '@/components/vendors/vendor-detail-tables';
 import { formatCurrency, formatDate } from '@/lib/utils';
-import type { Vendor, Payment, Invoice } from '@/lib/types';
+import type { Vendor } from '@/lib/types';
+import { notFound } from 'next/navigation';
 
-export default function VendorDetailPage() {
-    const { id } = useParams();
-    const router = useRouter();
+interface VendorDetailPageProps {
+    params: Promise<{ id: string }>;
+}
 
-    const { data: vendor } = useQuery<Vendor>( {
-        queryKey: ['vendor', id],
-        queryFn: () => fetch( `/api/vendors/${id}` ).then( ( r ) => r.json() ),
-    } );
+export default async function VendorDetailPage( { params }: VendorDetailPageProps ) {
+    const { id } = await params;
 
-    const { data: payments = [] } = useQuery<Payment[]>( {
-        queryKey: ['payments'],
-        queryFn: () => fetch( '/api/payments' ).then( ( r ) => r.json() ),
-    } );
-
-    const { data: invoices = [] } = useQuery<Invoice[]>( {
-        queryKey: ['invoices'],
-        queryFn: () => fetch( '/api/invoices' ).then( ( r ) => r.json() ),
-    } );
-
-    const vendorPayments = payments.filter( ( p ) => p.vendorId === id );
-    const vendorInvoices = invoices.filter( ( i ) => i.vendorId === id );
+    const [vendor, payments, invoices] = await Promise.all( [
+        getVendorById( id ),
+        getPaymentsByVendorId( id ),
+        getInvoicesByVendorId( id ),
+    ] );
 
     if ( !vendor ) {
-        return (
-            <div className="py-20 text-center text-slate-500">Loading vendor…</div>
-        );
+        notFound();
     }
 
-    const paymentColumns: DataTableColumn<Payment>[] = [
-        {
-            key: 'invoice',
-            header: 'Invoice',
-            render: ( p ) => <span className="font-medium text-white">{p.invoiceNumber}</span>,
-        },
-        {
-            key: 'amount',
-            header: 'Amount',
-            render: ( p ) => <span className="font-semibold text-white">{formatCurrency( p.amount )}</span>,
-        },
-        {
-            key: 'status',
-            header: 'Status',
-            render: ( p ) => <StatusBadge status={p.status} />,
-        },
-        {
-            key: 'scheduled',
-            header: 'Scheduled',
-            render: ( p ) => <span className="text-slate-400">{formatDate( p.scheduledDate )}</span>,
-        },
-    ];
-
-    const invoiceColumns: DataTableColumn<Invoice>[] = [
-        {
-            key: 'number',
-            header: 'Invoice #',
-            render: ( i ) => <span className="font-medium text-white">{i.invoiceNumber}</span>,
-        },
-        {
-            key: 'amount',
-            header: 'Amount',
-            render: ( i ) => <span className="font-semibold text-white">{formatCurrency( i.amount )}</span>,
-        },
-        {
-            key: 'status',
-            header: 'Status',
-            render: ( i ) => <StatusBadge status={i.status} />,
-        },
-        {
-            key: 'due',
-            header: 'Due Date',
-            render: ( i ) => <span className="text-slate-400">{formatDate( i.dueDate )}</span>,
-        },
-    ];
 
     return (
         <div className="space-y-8 pt-8 lg:pt-0">
-            <button
-                onClick={() => router.push( '/vendors' )}
-                className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors"
+            <Link
+                href="/vendors"
+                className="flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors w-fit"
             >
                 <ArrowLeft size={16} />
                 Back to Vendors
-            </button>
+            </Link>
 
             {/* Vendor Header */}
             <div className="glass-card rounded-2xl p-6">
@@ -162,15 +105,17 @@ export default function VendorDetailPage() {
 
             {/* Vendor Invoices */}
             <div>
-                <h3 className="text-lg font-semibold text-white mb-4">Invoices ({vendorInvoices.length})</h3>
-                <DataTable columns={invoiceColumns} data={vendorInvoices} emptyMessage="No invoices for this vendor." />
+                <h3 className="text-lg font-semibold text-white mb-4">Invoices ({invoices.length})</h3>
+                <VendorInvoicesTable invoices={invoices} />
             </div>
 
             {/* Vendor Payments */}
             <div>
-                <h3 className="text-lg font-semibold text-white mb-4">Payments ({vendorPayments.length})</h3>
-                <DataTable columns={paymentColumns} data={vendorPayments} emptyMessage="No payments for this vendor." />
+                <h3 className="text-lg font-semibold text-white mb-4">Payments ({payments.length})</h3>
+                <VendorPaymentsTable payments={payments} />
             </div>
         </div>
     );
 }
+
+export const dynamic = 'force-dynamic';
