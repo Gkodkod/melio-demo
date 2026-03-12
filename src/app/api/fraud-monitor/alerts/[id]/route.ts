@@ -3,10 +3,10 @@ import { getDb, mapFraudAlert, mapPayment, mapVendor, mapTransactionEvent } from
 
 export async function GET(
     _req: Request,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     const supabase = getDb();
-    const { id } = params;
+    const { id } = await params;
 
     // Fraud alert
     const { data: alertRow, error: alertErr } = await supabase
