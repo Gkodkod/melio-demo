@@ -28,18 +28,16 @@ This project demonstrates core fintech platform concepts:
 1. **Dashboard** — summary cards for total payments, pending payments, completed payments, and failed payments; recent activity feed showing payment events; charts for payment volume and status distribution
 2. **Vendors** — vendor list table, vendor details page, payment method info (ACH or card), mock bank verification status
 3. **Invoices** — invoice list, mock invoice upload, invoice approval workflow, attach invoice to vendor
-4.  **Dashboard** — summary cards for total payments, pending payments, completed payments, and failed payments; recent activity feed showing payment events; charts for payment volume and status distribution
-5.  **Vendors** — vendor list table, vendor details page, payment method info (ACH or card), mock bank verification status
-6.  **Invoices** — invoice list, mock invoice upload, invoice approval workflow, attach invoice to vendor
-7.  **Payments** — create payment, select vendor and invoice, choose payment method, schedule payment, payment status lifecycle: draft → scheduled → processing → settled → failed
-8.  **Transactions Feed** — event-style log similar to Stripe webhooks tracking payment lifecycle events
-9.  **Reconciliation Page** — table showing invoice amount vs payment amount, settlement batch grouping, highlight mismatches
-12.  **Dev Console** — mock developer API console for generating API keys, simulating payments, viewing request logs, and triggering mock webhooks
-13.  **Partner Portal** — simulator for onboarding external partners, monitoring their API usage, managing webhook connections, and rotating partner API keys
-14.  **System Events** — real-time event log and service telemetry dashboard with timeline and architecture visualizations
-15.  **Double-Entry Ledger** — core accounting system with strict double-entry invariants, transaction journal, and immutable audit trail
-16.  **Retry Queue** — automated backoff simulation tracking failed payments with customizable exponential retry intervals
-17.  **International Payments & FX Spread** — real-time foreign exchange rate conversion with cached Supabase lookup, simulating revenue generation through implicit FX margin markups and transfer fees.
+4. **Payments** — create payment, select vendor and invoice, choose payment method, schedule payment, payment status lifecycle: draft → scheduled → processing → settled → failed
+5. **Transactions Feed** — event-style log similar to Stripe webhooks tracking payment lifecycle events
+6. **Reconciliation Page** — table showing invoice amount vs payment amount, settlement batch grouping, highlight mismatches
+7. **Fraud Monitor** — suspicious payments table, risk filters, triggered rules, and vendor risk profiles
+8. **Dev Console** — mock developer API console for generating API keys, simulating payments, viewing request logs, and triggering mock webhooks
+9. **Partner Portal** — simulator for onboarding external partners, monitoring their API usage, managing webhook connections, and rotating partner API keys
+10. **System Events** — real-time event log and service telemetry dashboard with timeline and architecture visualizations
+11. **Double-Entry Ledger** — core accounting system with strict double-entry invariants, transaction journal, and immutable audit trail
+12. **Retry Queue** — automated backoff simulation tracking failed payments with customizable exponential retry intervals
+13. **International Payments & FX Spread** — real-time foreign exchange rate conversion with cached Supabase lookup, simulating revenue generation through implicit FX margin markups and transfer fees.
 
 ### Design & Architecture
 
@@ -198,11 +196,12 @@ The app ships with a **dark/light theme toggle** in the sidebar. The theme prefe
 
 ## Tech Stack
 
-- **Framework:** Next.js 14 (App Router) deployed on **Vercel**
-- **Language:** TypeScript
-- **Styling:** Tailwind CSS
-- **Database:** **Supabase PostgresDB** via `@supabase/supabase-js`
-- **Charts:** Recharts
-- **Data Fetching:** TanStack React Query
+- **Framework:** Next.js 16.1 (App Router / Turbopack) deployed on **Vercel**
+- **UI Library:** React 18
+- **Language:** TypeScript 5
+- **Styling:** Tailwind CSS 3.4
+- **Database:** **Supabase PostgresDB** via `@supabase/supabase-js` 2.49
+- **Charts:** Recharts 3.8
+- **Data Fetching:** TanStack React Query 5.90
 - **Icons:** Lucide React
-- **Date Utilities:** date-fns
+- **Date Utilities:** date-fns 4.1

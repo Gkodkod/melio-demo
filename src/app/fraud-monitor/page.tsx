@@ -23,9 +23,7 @@ const FraudCharts = nextDynamic( () => import( '@/components/fraud/fraud-charts'
     loading: () => <div className="grid grid-cols-1 lg:col-span-2 gap-6 h-[280px] bg-slate-800/20 animate-pulse rounded-2xl" />,
 } );
 
-const FraudAlertModal = nextDynamic( () => import( '@/components/fraud/fraud-alert-modal' ), {
-    ssr: false,
-} );
+const FraudAlertModal = nextDynamic( () => import( '@/components/fraud/fraud-alert-modal' ) );
 
 interface PageProps {
     searchParams: Promise<{
