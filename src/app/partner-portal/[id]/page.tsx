@@ -16,11 +16,12 @@ export const metadata: Metadata = {
     title: 'Partner Detail | Melio',
 };
 
-export default async function PartnerDetailPage( { params }: { params: { id: string } } ) {
+export default async function PartnerDetailPage( { params }: { params: Promise<{ id: string }> } ) {
+    const { id } = await params;
     const supabase = getDb();
 
     const { data: partnerRow } = await supabase
-        .from( 'partners' ).select( '*' ).eq( 'id', params.id ).single();
+        .from( 'partners' ).select( '*' ).eq( 'id', id ).single();
     if ( !partnerRow ) notFound();
     const partner = mapPartner( partnerRow as Record<string, unknown> ) as Partner;
 
