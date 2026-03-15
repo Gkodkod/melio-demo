@@ -5,10 +5,10 @@ export const metadata: Metadata = {
     title: 'Vendors | Melio',
     description: 'Manage your vendor relationships and payment methods.',
 };
-import { Plus } from 'lucide-react';
 import VendorsTable from '@/components/vendors/vendors-table';
 import PageHeader from '@/components/page-header';
 import SearchInput from '@/components/search-input';
+import AddVendorPanel from '@/components/vendors/add-vendor-panel';
 
 interface VendorsPageProps {
     searchParams: Promise<{ q?: string }>;
@@ -29,12 +29,7 @@ export default async function VendorsPage( { searchParams }: VendorsPageProps ) 
             <PageHeader
                 title="Vendors"
                 description="Manage your vendor relationships and payment methods. Click on a vendor name to view their details."
-                action={
-                    <button className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-indigo-500/20">
-                        <Plus size={16} />
-                        Add Vendor
-                    </button>
-                }
+                action={<AddVendorPanel />}
             />
 
             <SearchInput placeholder="Search vendors..." />

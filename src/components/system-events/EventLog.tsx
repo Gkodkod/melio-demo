@@ -101,22 +101,15 @@ export default function EventLog( { events, onEventClick, selectedCorrelationId 
                                     </div>
 
                                     {/* Main Event Data */}
-                                    <div className="flex-1 min-w-0 flex flex-col gap-1">
+                                    <div className="flex-1 min-w-0 flex flex-col gap-1.5">
+                                        {/* Line 1: Type and Time */}
                                         <div className="flex items-center justify-between gap-4">
-                                            <div className="flex items-center gap-2 truncate">
-                                                <span className={cn(
-                                                    "font-mono text-[13px] font-semibold tracking-tight truncate",
-                                                    isDark ? "text-slate-200" : "text-slate-900"
-                                                )}>
-                                                    {event.type}
-                                                </span>
-                                                <span className={cn(
-                                                    "px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-semibold border",
-                                                    isDark ? "bg-slate-800 border-slate-700 text-slate-300" : "bg-slate-100 border-slate-200 text-slate-600"
-                                                )}>
-                                                    {event.service}
-                                                </span>
-                                            </div>
+                                            <span className={cn(
+                                                "font-mono text-[13px] font-semibold tracking-tight truncate",
+                                                isDark ? "text-slate-200" : "text-slate-900"
+                                            )}>
+                                                {event.type}
+                                            </span>
                                             <div className="flex items-center gap-1.5 flex-shrink-0 text-[11px] font-mono whitespace-nowrap">
                                                 <Clock size={12} className={isDark ? "text-slate-500" : "text-slate-400"} />
                                                 <span className={isDark ? "text-slate-400" : "text-slate-500"}>
@@ -124,8 +117,19 @@ export default function EventLog( { events, onEventClick, selectedCorrelationId 
                                                 </span>
                                             </div>
                                         </div>
+                                        
+                                        {/* Line 2: Service Badge */}
+                                        <div className="flex items-center">
+                                            <span className={cn(
+                                                "px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wider font-semibold border",
+                                                isDark ? "bg-slate-800 border-slate-700 text-slate-300" : "bg-slate-100 border-slate-200 text-slate-600"
+                                            )}>
+                                                {event.service}
+                                            </span>
+                                        </div>
 
-                                        <div className="flex items-center justify-between text-xs">
+                                        {/* Line 3: Correlation ID and Payload toggler */}
+                                        <div className="flex items-center justify-between text-xs mt-0.5">
                                             <div className={cn( "font-mono truncate", isDark ? "text-slate-500" : "text-slate-400" )}>
                                                 corr_id: <span className={cn( isDark ? "text-indigo-400" : "text-indigo-600" )}>{event.correlationId}</span>
                                             </div>
