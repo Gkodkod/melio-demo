@@ -74,18 +74,25 @@ export default function ReconciliationPage() {
         {
             key: 'match',
             header: 'Status',
-            render: ( r ) =>
-                r.matched ? (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
+            render: ( r ) => {
+                const isFailed = r.paymentAmount === 0;
+                const diff = r.invoiceAmount - r.paymentAmount;
+                const mismatchType = isFailed 
+                    ? 'Transfer Failure' 
+                    : diff < 50 ? 'FX Rate Variance' : 'Underpayment';
+
+                return r.matched ? (
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-400" title="Amounts match exactly">
                         <CheckCircle2 size={14} />
                         Matched
                     </span>
                 ) : (
-                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-400">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-400 cursor-help" title={`Mismatch: ${mismatchType}`}>
                         <AlertTriangle size={14} />
                         Mismatch
                     </span>
-                ),
+                );
+            },
         },
         {
             key: 'settled',
@@ -98,7 +105,7 @@ export default function ReconciliationPage() {
         <div className="space-y-8 pt-8 lg:pt-0">
             <PageHeader
                 title="Reconciliation"
-                description="Match invoice amounts against settled payments"
+                description="Reconcile expected invoice amounts against actual payment settlements. Mismatches highlight discrepancies like underpayments, transfer failures, or FX rate variances."
             />
 
             {/* Summary Cards */}

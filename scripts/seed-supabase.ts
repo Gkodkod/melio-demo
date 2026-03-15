@@ -213,7 +213,8 @@ for ( const [dateKey, batchPayments] of Object.entries( batchGroups ) ) {
         const hasMismatch = Math.random() < 0.15;
         // Invoice amount is the true amount. If there's a mismatch, the payment amount differs.
         const invoiceAmount = invoice?.amount ?? p.amount;
-        const paymentAmount = hasMismatch ? invoiceAmount - randomBetween( 10, 250 ) : invoiceAmount;
+        const isFailed = p.status === 'failed';
+        const paymentAmount = isFailed ? 0 : (hasMismatch ? invoiceAmount - randomBetween( 10, 250 ) : invoiceAmount);
         const diff = Math.round( ( invoiceAmount - paymentAmount ) * 100 ) / 100;
 
         reconciliation.push( {
@@ -221,7 +222,7 @@ for ( const [dateKey, batchPayments] of Object.entries( batchGroups ) ) {
             invoice_number: ( invoices.find( i => i.id === p.invoice_id ) as { invoice_number: string } | undefined )?.invoice_number ?? '',
             payment_id: p.id, vendor_name: p.vendor_name,
             invoice_amount: invoiceAmount, payment_amount: paymentAmount,
-            difference: Math.abs( diff ), matched: diff === 0 && p.status !== 'failed',
+            difference: Math.abs( diff ), matched: diff === 0 && !isFailed,
             batch_id: batchId, settled_date: p.settled_date || p.processed_date || p.scheduled_date,
         } );
     }
