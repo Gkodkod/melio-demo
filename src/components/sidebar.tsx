@@ -93,11 +93,11 @@ export default function Sidebar() {
                 )}
             >
                 {/* Logo */}
-                <div className={cn(
-                    'flex items-center gap-3 px-6 py-6 border-b',
+                <Link href="/" onClick={() => setMobileOpen( false )} className={cn(
+                    'flex items-center gap-3 px-6 py-6 border-b hover:opacity-80 transition-opacity',
                     isDark ? 'border-slate-700/50' : 'border-slate-200'
                 )}>
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center font-bold text-sm text-white">
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 to-cyan-400 flex items-center justify-center font-bold text-sm text-white shrink-0">
                         M
                     </div>
                     <div>
@@ -108,7 +108,7 @@ export default function Sidebar() {
                             Payments Platform
                         </p>
                     </div>
-                </div>
+                </Link>
 
                 {/* Nav */}
                 <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">

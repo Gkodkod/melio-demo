@@ -78,11 +78,28 @@ const fraudStatuses = ['pending', 'pending', 'investigating', 'cleared', 'confir
 
 // ─── Generate data ─────────────────────────────────────────────────
 
-// Scale up vendors
-const extraVendors = Array.from( { length: 20 }, ( _, i ) => ({
-    name: `Vendor ${i + 31} Corp`,
-    domain: `vendor${i + 31}.com`
-}));
+const extraVendors = [
+  { name: 'Apex Consulting LLC', domain: 'apexconsulting.co' },
+  { name: 'John Smith Design', domain: 'johnsmithdesign.com' },
+  { name: 'Horizon Logistics Inc.', domain: 'horizonlogistics.co' },
+  { name: 'Jane Doe Writing Services', domain: 'writingservices.net' },
+  { name: 'Quantum Computing Solutions', domain: 'quantumcs.io' },
+  { name: 'BuildRight Construction', domain: 'buildright.com' },
+  { name: 'Bright Future Marketing', domain: 'brightfuturemktg.com' },
+  { name: 'Michael Chang Photography', domain: 'changphoto.com' },
+  { name: 'Elite Security Services', domain: 'elitesecurity.com' },
+  { name: 'Dr. Emily Chen Consulting', domain: 'healthconsult.org' },
+  { name: 'Sarah Jenkins Freelance', domain: 'freelance-sj.com' },
+  { name: 'FastTrack Delivery LLC', domain: 'fasttrackdel.com' },
+  { name: 'Global Import Export Co.', domain: 'globalimport.com' },
+  { name: 'Artisan Bakery Supplies', domain: 'artisanbakery.com' },
+  { name: 'David Lee IT Support', domain: 'davidleeit.net' },
+  { name: 'NextGen Software Devs', domain: 'nextgensoftware.dev' },
+  { name: 'Summit Financial Advisors', domain: 'summitfinancial.com' },
+  { name: 'Maria Rodriguez Translation', domain: 'rodrigueztranslations.com' },
+  { name: 'Green Earth Landscaping', domain: 'greenearthscapes.com' },
+  { name: 'Alex Johnson Legal Consulting', domain: 'johnsonlegal.com' }
+];
 
 const vendors = [
     ...companyNames.map( ( name, i ) => ({ name, domain: emailDomains[i] })),

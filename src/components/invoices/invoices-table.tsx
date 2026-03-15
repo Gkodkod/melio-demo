@@ -24,12 +24,18 @@ export default function InvoicesTable( { invoices, showUploadModal, setShowUploa
             header: 'Invoice',
             sortValue: ( i ) => i.invoiceNumber,
             render: ( i ) => (
-                <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center text-blue-400">
+                <div 
+                    className="flex items-center gap-3 cursor-pointer group"
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setShowPdfViewer(i);
+                    }}
+                >
+                    <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500/20 to-cyan-500/20 flex items-center justify-center text-blue-400 group-hover:bg-blue-500/30 transition-colors">
                         <FileText size={16} />
                     </div>
                     <div>
-                        <p className="font-medium text-white">{i.invoiceNumber}</p>
+                        <p className="font-medium text-white group-hover:text-blue-400 transition-colors">{i.invoiceNumber}</p>
                         <p className="text-xs text-slate-500">{i.description}</p>
                     </div>
                 </div>
@@ -77,16 +83,6 @@ export default function InvoicesTable( { invoices, showUploadModal, setShowUploa
                             Review
                         </button>
                     )}
-                    <button
-                        onClick={( e ) => {
-                            e.stopPropagation();
-                            setShowPdfViewer( i );
-                        }}
-                        className="text-xs font-semibold text-slate-400 hover:text-white transition-colors flex items-center gap-1.5 bg-slate-800/50 hover:bg-slate-700/50 px-3 py-1.5 rounded-lg border border-slate-700/50"
-                    >
-                        <FileText size={14} />
-                        View PDF
-                    </button>
                 </div>
             )
         },

@@ -13,7 +13,7 @@ export default function InvoicesView( { invoices }: { invoices: Invoice[] } ) {
         <div className="space-y-6">
             <PageHeader
                 title="Invoices"
-                description="Track and manage vendor invoices"
+                description="Track and manage vendor invoices. Click on the invoice number to view, save or print the invoice."
                 action={<UploadInvoiceButton onClick={() => setShowUploadModal( true )} />}
             />
 
