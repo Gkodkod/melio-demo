@@ -57,16 +57,19 @@ export default function ReconciliationPage() {
         {
             key: 'diff',
             header: 'Difference',
-            render: ( r ) => (
-                <span
-                    className={cn(
-                        'font-semibold text-xs',
-                        r.difference === 0 ? 'text-slate-500' : 'text-red-400'
-                    )}
-                >
-                    {r.difference === 0 ? '—' : formatCurrency( r.difference )}
-                </span>
-            ),
+            render: ( r ) => {
+                const diff = r.invoiceAmount - r.paymentAmount;
+                return (
+                    <span
+                        className={cn(
+                            'font-semibold text-xs',
+                            diff === 0 ? 'text-slate-500' : 'text-red-400'
+                        )}
+                    >
+                        {diff === 0 ? '—' : formatCurrency( diff )}
+                    </span>
+                );
+            },
         },
         {
             key: 'match',
