@@ -37,20 +37,21 @@ export default function ReconciliationPage() {
         {
             key: 'vendor',
             header: 'Vendor',
-            render: ( r ) => <span className="text-slate-300">{r.vendorName}</span>,
+            className: 'max-w-[150px]',
+            render: ( r ) => <span className="text-slate-300 text-xs truncate max-w-[150px] inline-block" title={r.vendorName}>{r.vendorName}</span>,
         },
         {
             key: 'invoiceAmt',
             header: 'Invoice Amount',
             render: ( r ) => (
-                <span className="font-semibold text-white">{formatCurrency( r.invoiceAmount )}</span>
+                <span className="font-semibold text-xs text-white">{formatCurrency( r.invoiceAmount )}</span>
             ),
         },
         {
             key: 'paymentAmt',
             header: 'Payment Amount',
             render: ( r ) => (
-                <span className="font-semibold text-white">{formatCurrency( r.paymentAmount )}</span>
+                <span className="font-semibold text-xs text-white">{formatCurrency( r.paymentAmount )}</span>
             ),
         },
         {
@@ -59,7 +60,7 @@ export default function ReconciliationPage() {
             render: ( r ) => (
                 <span
                     className={cn(
-                        'font-semibold',
+                        'font-semibold text-xs',
                         r.difference === 0 ? 'text-slate-500' : 'text-red-400'
                     )}
                 >
@@ -86,7 +87,7 @@ export default function ReconciliationPage() {
         {
             key: 'settled',
             header: 'Settled',
-            render: ( r ) => <span className="text-slate-400">{formatDate( r.settledDate )}</span>,
+            render: ( r ) => <span className="text-slate-400 text-xs">{formatDate( r.settledDate )}</span>,
         },
     ];
 
