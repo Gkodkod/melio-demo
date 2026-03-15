@@ -97,7 +97,7 @@ export default function RetryQueuePage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-8 pt-20 lg:pt-8 transition-colors duration-200 flex justify-center">
+        <div className="min-h-screen p-8 pt-20 lg:pt-8 transition-colors duration-200 flex justify-center">
             <div className="w-full max-w-6xl space-y-8">
 
                 {/* Header */}
@@ -135,28 +135,28 @@ export default function RetryQueuePage() {
 
                 {/* Stats */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                    <div className="glass-card p-5 rounded-2xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                             <Activity size={48} />
                         </div>
                         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Total Events</p>
                         <p className="text-3xl font-bold text-slate-900 dark:text-white mt-1">{stats.total}</p>
                     </div>
-                    <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                    <div className="glass-card p-5 rounded-2xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-10 text-amber-500 group-hover:opacity-20 transition-opacity">
                             <Clock size={48} />
                         </div>
                         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Pending Retry</p>
                         <p className="text-3xl font-bold text-amber-600 dark:text-amber-400 mt-1">{stats.pending}</p>
                     </div>
-                    <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                    <div className="glass-card p-5 rounded-2xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-10 text-emerald-500 group-hover:opacity-20 transition-opacity">
                             <CheckCircle2 size={48} />
                         </div>
                         <p className="text-sm font-medium text-slate-500 dark:text-slate-400">Resolved</p>
                         <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{stats.resolved}</p>
                     </div>
-                    <div className="bg-white dark:bg-slate-800 p-5 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm relative overflow-hidden group">
+                    <div className="glass-card p-5 rounded-2xl relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-4 opacity-10 text-rose-500 group-hover:opacity-20 transition-opacity">
                             <XCircle size={48} />
                         </div>
@@ -166,7 +166,7 @@ export default function RetryQueuePage() {
                 </div>
 
                 {/* Queue Table */}
-                <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm overflow-hidden">
+                <div className="glass-card rounded-2xl overflow-hidden">
                     <div className="p-5 border-b border-slate-200 dark:border-slate-700 flex justify-between items-center">
                         <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Active Queue</h2>
                         <button onClick={fetchQueue} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
