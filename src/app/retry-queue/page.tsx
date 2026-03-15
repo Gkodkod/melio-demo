@@ -97,8 +97,8 @@ export default function RetryQueuePage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-8 pt-20 lg:pt-8 lg:pl-72 transition-colors duration-200">
-            <div className="max-w-6xl mx-auto space-y-8">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-8 pt-20 lg:pt-8 transition-colors duration-200 flex justify-center">
+            <div className="w-full max-w-6xl space-y-8">
 
                 {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
