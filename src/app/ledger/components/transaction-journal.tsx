@@ -20,7 +20,7 @@ export default function TransactionJournal({ entries, isDark }: { entries: Ledge
     );
 
     return (
-        <div className="lg:col-span-2 space-y-4 flex flex-col h-full max-h-[calc(100vh-160px)]">
+        <div className="space-y-4 flex flex-col h-full max-h-[calc(100vh-160px)]">
             <div className="flex items-center justify-between shrink-0">
                 <h2 className={cn( "text-lg font-semibold flex items-center gap-2", isDark ? "text-slate-100" : "text-slate-900" )}>
                     <History size={20} className="text-indigo-500" />

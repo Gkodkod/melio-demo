@@ -19,15 +19,13 @@ export default async function LedgerDashboard() {
     ]);
 
     return (
-        <div className="flex-1 space-y-6 max-w-[1600px] w-full mx-auto pb-10">
+        <div className="space-y-6 pt-8 lg:pt-0">
             <PageHeader
                 title="Double-Entry Ledger"
                 description="Core accounting system with strict double-entry invariants, transaction journal, and immutable audit trail."
             />
-            {/* Force recompile */}
 
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-[calc(100vh-160px)] min-h-[500px]">
+            <div className="space-y-6">
                 <ChartOfAccounts accounts={accounts} isDark={isDark} />
                 <TransactionJournal entries={entries} isDark={isDark} />
             </div>

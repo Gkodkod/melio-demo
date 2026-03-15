@@ -31,29 +31,29 @@ export default function ChartOfAccounts({ accounts, isDark }: { accounts: Ledger
                 </h2>
             </div>
 
-            <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 {accounts.map( account => (
                     <div key={account.id} className={cn(
-                        "p-5 rounded-xl border flex items-center justify-between transition-all hover:shadow-md",
+                        "p-3 xl:p-4 rounded-xl border flex flex-col justify-between transition-all hover:shadow-md",
                         getAccountColor( account.name, account.type, isDark )
                     )}>
-                        <div className="flex items-center gap-4">
-                            <div className={cn( "p-3 rounded-lg flex-shrink-0 bg-white/50 backdrop-blur-sm dark:bg-black/20" )}>
+                        <div className="flex items-center gap-2.5 mb-3">
+                            <div className={cn( "p-2 rounded-lg flex-shrink-0 bg-white/50 backdrop-blur-sm dark:bg-black/20" )}>
                                 {getAccountIcon( account.name, account.type )}
                             </div>
                             <div className="overflow-hidden">
-                                <h3 className={cn( "font-medium truncate", isDark ? "text-slate-200" : "text-slate-900" )} title={account.name}>
+                                <h3 className={cn( "text-sm font-semibold truncate leading-tight", isDark ? "text-slate-200" : "text-slate-900" )} title={account.name}>
                                     {account.name}
                                 </h3>
-                                <p className={cn( "text-xs uppercase tracking-wider font-semibold",
+                                <p className={cn( "text-[10px] uppercase tracking-wider font-bold mt-0.5",
                                     account.type === 'asset' || account.type === 'expense' ? "text-blue-500" : "text-emerald-500"
                                 )}>
                                     {account.type}
                                 </p>
                             </div>
                         </div>
-                        <div className="text-right flex-shrink-0 ml-4">
-                            <p className={cn( "text-base font-bold font-mono tracking-tight", isDark ? "text-slate-100" : "text-slate-900" )}>
+                        <div className="mt-auto">
+                            <p className={cn( "text-sm lg:text-base font-bold font-mono tracking-tight truncate", isDark ? "text-slate-100" : "text-slate-900" )}>
                                 {formatCurrency( account.balance )}
                             </p>
                         </div>
