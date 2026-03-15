@@ -211,13 +211,16 @@ for ( const [dateKey, batchPayments] of Object.entries( batchGroups ) ) {
     for ( const p of batchPayments ) {
         const invoice = invoices.find( i => i.id === p.invoice_id ) as { amount: number } | undefined;
         const hasMismatch = Math.random() < 0.15;
-        const paymentAmount = hasMismatch ? p.amount - randomBetween( 10, 250 ) : p.amount;
-        const diff = Math.round( ( ( invoice?.amount ?? p.amount ) - paymentAmount ) * 100 ) / 100;
+        // Invoice amount is the true amount. If there's a mismatch, the payment amount differs.
+        const invoiceAmount = invoice?.amount ?? p.amount;
+        const paymentAmount = hasMismatch ? invoiceAmount - randomBetween( 10, 250 ) : invoiceAmount;
+        const diff = Math.round( ( invoiceAmount - paymentAmount ) * 100 ) / 100;
+
         reconciliation.push( {
             id: `rec-${pad( recCounter++, 3 )}`, invoice_id: p.invoice_id,
             invoice_number: ( invoices.find( i => i.id === p.invoice_id ) as { invoice_number: string } | undefined )?.invoice_number ?? '',
             payment_id: p.id, vendor_name: p.vendor_name,
-            invoice_amount: invoice?.amount ?? p.amount, payment_amount: paymentAmount,
+            invoice_amount: invoiceAmount, payment_amount: paymentAmount,
             difference: Math.abs( diff ), matched: diff === 0 && p.status !== 'failed',
             batch_id: batchId, settled_date: p.settled_date || p.processed_date || p.scheduled_date,
         } );
